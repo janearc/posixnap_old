@@ -1,0 +1,26 @@
+body {
+	background-color: white;
+	color: black;
+	font: 10px Verdana, Arial, sans-serif;
+}
+
+div.mainbox {
+	background-color: black;
+	color: #6699CC;
+	width: 768px;
+}
+
+div.subbox {
+	background-color: white;
+	color: black;
+	font: 10px Verdana, Arial, sans-serif;
+	width: 700px;
+}
+
+a:link {
+	color: black;
+}
+
+a:visited {
+	color: black;
+}

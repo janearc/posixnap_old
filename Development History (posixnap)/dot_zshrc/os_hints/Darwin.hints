@@ -1,0 +1,8 @@
+# Darwin.hints
+# Correct for some darwin oddities
+#
+# $Id: Darwin.hints,v 1.1 2004-03-03 02:54:34 alex Exp $
+
+alias eeprom=nvram
+
+# aja // vim:tw=80:ts=2:noet:syntax=zsh

@@ -1,0 +1,40 @@
+# All lines starting with # are ignored. 
+# Admin email address to which status reports are sent to. For multiple addresses seperate
+# with commas
+admin_email thardison@modbee.com
+mailuser sunbot@modbee.com
+smtpserver 172.17.52.18
+
+# time interval in seconds. Five minutes seems reasonable to me.
+
+interval 300
+
+#Set a location for the error log. If not defined default is /var/adm/inti_error.log
+
+error_log inti_error.log
+
+#Daemon list (by process name) of which to monitor seperated with commas
+
+daemon_list nwadmin
+
+# File systems to monitor and at what point to warn.
+
+filesystems /,/tmp
+
+warn_percent 70
+crit_percent 95
+
+# Physical memory check. Yes or no for memory usage statistics.
+
+phymem_check yes
+crit_free 1024
+crit_swap 1024
+
+# Load warning. This will warn or crit depending on your settings. Note that on
+# multiple processor systems that the loads are divided by processor.
+# so a load of one on a 3 way system is the same as a 3 load on a 1 way.
+
+warn_load 5
+crit_load 10
+
+

@@ -1,0 +1,11 @@
+=head1 Orchid TODO File
+
+=item Legacy Modules
+
+Somebody needs to go through and discern which modules do 
+things which could be blocking, and put them somewhere so
+they can be made non-blocking. By the same token, somebody 
+needs to take the modules which aren't blocking, like the
+BSD::Resource ('pig') module, and simply put it somewhere
+we know we can use it without fear of having it block the
+rest of the application.

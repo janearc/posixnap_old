@@ -1,0 +1,14 @@
+<lodge-config>
+	<xml>1</xml>
+	<player name='atrummer'>
+		<wizard-search-list threshold='35000'>
+			<item name='Orn Codestone' price='4375' quantity='8'/>
+			<item name='Vo Codestone' price='4490' quantity='8'/>
+			<item name='Har Codestone' price='4599' quantity='8'/>
+			<item name='Zei Codestone' price='4290' quantity='8'/>
+		</wizard-search-list>
+		<train-list threshold='35000'>
+			<pet name='Khaytsus' discipline='Endurance'/>
+		</train-list>
+	</player>
+</lodge-config>

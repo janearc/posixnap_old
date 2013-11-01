@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>SWIG and C#</title>
+</head>
+<body bgcolor="#FFFFFF">
+<a name="n1"></a><H1>15 SWIG and C#</H1>
+<!-- INDEX -->
+<ul>
+</ul>
+<!-- INDEX -->
+
+The purpose of the C# module is to offer an automated way of accessing existing C/C++ code from .NET languages.
+The wrapper code implementation uses the Platform Invoke (PINVOKE) interface to access natively compiled C/C++ code.
+The PINVOKE interface has been chosen over Microsoft's Managed C++ interface as it is portable to both Microsoft Windows and non-Microsoft platforms.
+PINVOKE is part of the ECMA/ISO C# specification.
+
+<p>
+The C# module is one of the more recently added language modules to SWIG and consequently is missing some functionality available in some other SWIG modules.
+The C# module is very similar to the Java module, so until some documentation has been written,
+please use the <a href="Java.html">Java documentation</a> as a guide to using SWIG with C#.
+The rest of this chapter should be read in conjunction with the Java documentation as it lists the main differences.
+
+<p>
+Director support (virtual method callbacks into C#) has not yet been implemented and is the main missing feature compared to Java.
+The other missing feature is the lack of typemaps for wrapping STL code as well as a few minor utility typemaps in the various.i library.
+
+<p>
+Currently enums are wrapped with C# integers.
+Be warned that this will change in a forthcoming release.
+C# enums will be generated instead.
+
+<p>
+
+The most noteable differences to Java are the following:
+<ul>
+
+<li>
+When invoking SWIG use the <tt>-csharp</tt> command line option instead of <tt>-java</tt>.
+</li>
+
+<li>
+C/C++ variables are wrapped with C# properties and not JavaBean style getters and setters.
+</li>
+
+<li>
+Typemap equivalent names:
+
+<blockquote><pre>
+jni                         -> ctype
+jtype                       -> imtype
+jstype                      -> cstype
+javain                      -> csin
+javaout                     -> csout
+javainterfaces              -> csinterfaces
+javabase                    -> csbase
+javaclassmodifiers          -> csclassmodifiers
+javacode                    -> cscode
+javaimports                 -> csimports
+javaptrconstructormodifiers -> csptrconstructormodifiers
+javagetcptr                 -> csgetcptr
+javafinalize                -> csfinalize
+javadestruct                -> csdestruct
+javadestruct_derived        -> csdestruct_derived
+</pre></blockquote>
+
+</li>
+
+<li>
+Additional typemaps:
+
+<blockquote><pre>
+csvarin                     C# code property set typemap
+csvarout                    C# code property get typemap
+</pre></blockquote>
+
+</li>
+
+<li>
+Feature equivalent names:
+<blockquote><pre>
+javaconst                   -> csconst
+javamethodmodifiers         -> csmethodmodifiers
+</pre></blockquote>
+</li>
+
+<li>
+Pragma equivalent names:
+<blockquote><pre>
+pragma(java)                -> pragma(csharp)
+jniclassbase                -> imclassbase
+jniclassclassmodifiers      -> imclassclassmodifiers
+jniclasscode                -> imclasscode
+jniclassimports             -> imclassimports
+jniclassinterfaces          -> imclassinterfaces
+</pre></blockquote>
+</li>
+
+<li>
+Special variable equivalent names:
+<blockquote><pre>
+$javaclassname              -> $csclassname
+$javainput                  -> $csinput
+$jnicall                    -> $imcall
+</pre></blockquote>
+</li>
+
+</ul>
+An additional special variable, <tt>$module</tt>, is replaced by the module name,
+as specified in the <tt>%module</tt> directive or <tt>-module</tt> command line option.
+The intermediary classname has <tt>PINVOKE</tt> appended after the module name instead of <tt>JNI</tt>, for example <tt>modulenamePINVOKE</tt>.
+
+<p>
+The directory <tt>Examples/csharp</tt> has a number of simple examples. 
+Visual Studio .NET 2003 solution and project files are available for compiling with the Microsoft .NET C# compiler on Windows.
+If your SWIG installation went well on a Unix environment and your C# compiler was detected, you should be able to type <tt>make</tt> in each example directory, 
+then <tt>ilrun runme</tt> (Portable.NET C# compiler) or <tt>mono runme</tt> (Mono C# compiler) to run the examples.
+Windows users can also get the examples working using a
+<a href="http://www.cygwin.com">Cygwin</a> or <a href=http://www.mingw.org>MinGW</a> environment for automatic configuration of the example makefiles.
+Any one of the three C# compilers (Portable.NET, Mono or Microsoft) can be detected from within a Cygwin or Mingw environment if installed in your path. 
+
+</body>
+</html>

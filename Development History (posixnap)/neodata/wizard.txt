@@ -1,0 +1,6 @@
+orn codestone:4895:8
+vo codestone:4970:8
+har codestone:4980:8
+zei codestone:4895:8
+fire faerie:2600:2
+earth faerie:2839:2

@@ -1,0 +1,10 @@
+AA:	need to convert these from $nap -> methodname to some generic "return" format.
+
+AA: probably convert to elvis (pelvis?)
+
+AA: isolate schema to use a 'petunia' user.
+
+AA: move to POE framework.
+
+AA:	much effort must be expended to increase the efficiency of the code. 
+		sitting idle, the bot consumes immense amounts of cpu. (pentium 200)

@@ -1,0 +1,23 @@
+# OSF1.hints
+# helpful stuff for OSF1 initialization.
+# $Id: OSF1.hints,v 1.1 2004-03-03 02:54:34 alex Exp $
+
+addpath /usr/lib/lsm/bin
+addpath /usr/opt/s5/bin
+addpath /usr/opt/ultrix/usr/bin
+addpath /usr/opt/svr4/usr/bin
+addpath /usr/opt/svr4/usr/sadm/bin
+addpath /usr/opt/svr4/usr/sadm/bkup/bin
+addpath /usr/opt/svr4/usr/sadm/install/bin
+addpath /usr/opt/svr4/usr/sadm/sysadm/bin
+addpath /usr/share/.sysman/bin
+addpath /usr/share/sysman/bin
+addpath /usr/sys/bin
+addpath /usr/openv/netbackup/bin
+addpath /usr/openv/bin
+addpath /usr/sadm/bin
+addpath /usr/sadm/bkup/bin
+addpath /usr/sadm/install/bin
+addpath /usr/sadm/sysadm/bin
+
+# aja // vim:tw=80:ts=2:noet:syntax=zsh

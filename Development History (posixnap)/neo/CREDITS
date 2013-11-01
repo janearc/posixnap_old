@@ -1,0 +1,15 @@
+Neopets::* are the combined works of Alex Avriette and Matt Harrington.
+
+Matt Harrington <narse@underdogma.net>
+Alex Avriette <avriettea@speakeasy.net>
+
+The perl5.5 vs perl < 5.5 build process is stolen with permission from 
+sungo and the POE team (poe.perl.org), mostly verbatim.
+
+Code was taken from neohelper-1.1, which was written by James Maddison.
+Specifically, code in Neopets::Shops::Mine::Item.pm. Used with permission.
+
+I suppose we should thank the Neopets people too for making such a
+thoroughly enjoyable site. Maybe one day they will make a text interface
+for their site so we wouldnt have to code an API around the LWP:: and 
+HTTP:: modules, but probably not. Until then...

@@ -1,0 +1,12 @@
+Files:
+
+bin/test_shape_container.pl:
+        This file reads data from a preprogrammed file
+    to generate a shape and several points.  This file
+    is denoted by the constant `DATAFILE' and is set to
+    `example_files/file1.txt' by default.  This file
+    contains several line descriptions which are used
+    to create the shape.  The point descriptions are
+    read as simple point objects.  This program tests
+    if these point objects are contained within the
+    specified shape.

@@ -1,0 +1,41 @@
+This example tests the SWIG run-time libraries and use of the
+%import directive to work with multiple modules.
+
+Use 'perl runme.pl' to run a test.
+
+Overview:
+---------
+
+The example defines 4 different extension modules--each wrapping
+a separate C++ class.
+
+     base.i     -  Base class
+     foo.i      -  Foo class derived from Base
+     bar.i      -  Bar class derived from Base
+     spam.i     -  Spam class derived from Bar
+
+Each module used %import to refer to another module.  For
+example, the 'foo.i' module uses '%import base.i' to get
+definitions for its base class. 
+
+If everything is working correctly, all of the modules will load
+correctly and type checking will work correctly.   The
+example requires the use of the SWIG run-time libraries
+which must be built and properly installed.  
+
+Unix:
+-----
+- Make sure the SWIG runtime library is built and the path to it is 
+  in LD_LIBRARY_PATH
+- Run make
+- Run the test as described above
+
+Windows:
+--------
+- Make sure the SWIG runtime library is built and in your path. See Windows.html.
+- Use the Visual C++ 6 workspace file (example.dsw). Build each project 
+  to create the 4 DLLs. The Batch build option in the Build menu is the
+  easiest way to do this. Only use the Release builds not the Debug builds.
+- Run the test as described above
+
+

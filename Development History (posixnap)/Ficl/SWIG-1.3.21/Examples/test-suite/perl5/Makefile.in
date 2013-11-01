@@ -1,0 +1,45 @@
+#######################################################################
+# $Header: /home/jabba/convert/cvs/Ficl/SWIG-1.3.21/Examples/test-suite/perl5/Makefile.in,v 1.1 2004-02-01 04:03:01 alex Exp $
+# Makefile for perl5 test-suite
+#######################################################################
+
+LANGUAGE     = perl5
+SCRIPTSUFFIX = _runme.pl
+srcdir       = @srcdir@
+top_srcdir   = @top_srcdir@
+top_builddir = @top_builddir@
+
+include $(srcdir)/../common.mk
+
+# Overridden variables here
+SWIGOPT    = -shadow -I$(top_srcdir)/$(EXAMPLES)/$(TEST_SUITE)
+
+# Rules for the different types of tests
+%.cpptest: 
+	$(setup) \
+	($(swig_and_compile_cpp); ); \
+	$(run_testcase)
+
+%.ctest:
+	$(setup) \
+	($(swig_and_compile_c); ); \
+	$(run_testcase)
+
+%.multicpptest: 
+	$(setup) \
+	($(swig_and_compile_multi_cpp); ); \
+	$(run_testcase)
+
+# Runs the testcase. A testcase is only run if
+# a file is found which has _runme.pl appended after the testcase name.
+run_testcase = \
+	if [ -f $(srcdir)/$(SCRIPTPREFIX)$*$(SCRIPTSUFFIX) ]; then (	  \
+	  env LD_LIBRARY_PATH=$(DYNAMIC_LIB_PATH):$$LD_LIBRARY_PATH @PERL@ $(srcdir)/$(SCRIPTPREFIX)$*$(SCRIPTSUFFIX);) \
+	fi;
+
+# Clean: remove the generated .pm file
+%.clean:
+	@rm -f $*.pm;
+
+clean:
+	$(MAKE) -f $(top_builddir)/$(EXAMPLES)/Makefile perl5_clean

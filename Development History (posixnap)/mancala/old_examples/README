@@ -1,0 +1,7 @@
+    Test/example scripts for the mancala board.  Demonstrates several of the AIs involved.
+
+greedy battle:
+    this is a game using 12 Greedy players.  demonstrates that the first player wins
+
+player vs player:
+    a game between two players.  the player listed first moves first

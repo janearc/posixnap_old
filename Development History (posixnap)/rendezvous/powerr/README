@@ -1,0 +1,8 @@
+POE::Wheel::Run Rendezvous ("PoWeRR").
+
+Exists to launch as many mDNSProxyResponderPosix processes as specified
+in config file. Powerr watches its config file, and relaunches when it
+notices anything has changed.
+
+Alex Avriette, 2004
+alex@posixnap.net

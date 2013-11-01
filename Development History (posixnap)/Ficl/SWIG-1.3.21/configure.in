@@ -1,0 +1,1558 @@
+dnl Process this file with autoconf to produce a configure script.
+dnl The macros which aren't shipped with the autotools are stored in the 
+dnl Tools/config directory in .m4 files.
+
+AC_INIT([swig],[1.3.21],[http://www.swig.org])
+AC_PREREQ(2.54)
+AC_CONFIG_SRCDIR([Source/Swig/swig.h])
+AC_CONFIG_AUX_DIR([Tools/config])
+AC_CONFIG_HEADERS([Source/Include/swigconfig.h])
+AC_CANONICAL_HOST
+AM_INIT_AUTOMAKE
+
+dnl Some extra defines for the config file
+AH_BOTTOM([
+/* Default language */
+#define SWIG_LANG               "-tcl"
+
+/* Values returned by SWIG when invoked with the -ldflags option */
+#define SWIG_GUILE_RUNTIME      "-L" LIBDIR " -lswigguile" RELEASE_SUFFIX
+#define SWIG_GUILESCM_RUNTIME   "-L" LIBDIR " -lswigguilescm" RELEASE_SUFFIX
+#define SWIG_MZSCHEME_RUNTIME   "-L" LIBDIR " -lswigmz" RELEASE_SUFFIX
+#define SWIG_PERL_RUNTIME       "-L" LIBDIR " -lswigpl" RELEASE_SUFFIX
+#define SWIG_PIKE_RUNTIME       "-L" LIBDIR " -lswigpike" RELEASE_SUFFIX
+#define SWIG_PHP_RUNTIME        "-L" LIBDIR " -lswigphp4" RELEASE_SUFFIX
+#define SWIG_PYTHON_RUNTIME     "-L" LIBDIR " -lswigpy" RELEASE_SUFFIX
+#define SWIG_RUBY_RUNTIME       "-L" LIBDIR " -lswigrb" RELEASE_SUFFIX
+#define SWIG_TCL_RUNTIME        "-L" LIBDIR " -lswigtcl" RELEASE_SUFFIX
+#define SWIG_CHICKEN_RUNTIME    "-L" LIBDIR " -lswigchicken" RELEASE_SUFFIX
+])
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_YACC
+AC_EXEEXT
+AC_OBJEXT
+AM_PROG_CC_C_O  # Needed for subdir-objects in AUTOMAKE_OPTIONS
+AC_CHECK_PROGS(AR, ar aal, ar)
+AC_SUBST(AR)
+AC_LIBTOOL_WIN32_DLL
+
+# On Mac OS-X, static runtime libraries don't seem to build (and are
+# probably a bad idea anyways).  This turns this off in libtool.
+
+case $host in
+   *-*-darwin*) AC_DISABLE_STATIC;;
+   *);;
+esac
+
+AC_PROG_LIBTOOL
+AC_COMPILE_WARNINGS # Increase warning levels
+
+AC_DEFINE_UNQUOTED(SWIG_CXX, ["$CXX"], [Compiler that built SWIG])
+AC_DEFINE_UNQUOTED(SWIG_PLATFORM, ["$build"], [Platform that SWIG is built for])
+AC_DEFINE_DIR(LIBDIR, libdir, [Runtime library installation directory])
+
+
+dnl Checks for header files.
+AC_HEADER_STDC
+
+dnl How to specify include directories that may be system directories.
+# -I should not be used on system directories (GCC)
+if test "$GCC" = yes; then
+    ISYSTEM="-isystem "
+else
+    ISYSTEM="-I"
+fi
+
+
+dnl Checks for library functions.
+
+# Set info about shared libraries.
+AC_SUBST(SO)
+AC_SUBST(LDSHARED)
+AC_SUBST(CCSHARED)
+AC_SUBST(CXXSHARED)
+AC_SUBST(TRYLINKINGWITHCXX)
+AC_SUBST(LINKFORSHARED)
+
+# SO is the extension of shared libraries `(including the dot!)
+AC_MSG_CHECKING(SO)
+if test -z "$SO"
+then
+	case $host in
+	*-*-hp*) SO=.sl;;
+	*-*-darwin*) SO=.bundle;;
+	*-*-cygwin* | *-*-mingw*) SO=.dll;;
+	*) SO=.so;;
+	esac
+fi
+AC_MSG_RESULT($SO)
+
+# LDSHARED is the ld *command* used to create shared library
+# -- "ld" on SunOS 4.x.x, "ld -G" on SunOS 5.x, "ld -shared" on IRIX 5
+# (Shared libraries in this instance are shared modules to be loaded into
+# Python, as opposed to building Python itself as a shared library.)
+AC_MSG_CHECKING(LDSHARED)
+if test -z "$LDSHARED"
+then
+	case $host in
+	*-*-aix*) LDSHARED="\$(srcdir)/ld_so_aix \$(CC)";;
+	*-*-cygwin* | *-*-mingw*)
+            if test "$GCC" = yes; then
+                LDSHARED="$CC -shared"
+            else
+                if test "cl" = $CC ;  then
+                    # Microsoft Visual C++ (MSVC)
+                    LDSHARED="$CC -nologo -LD"
+                else
+                    # Unknown compiler try gcc approach
+                    LDSHARED="$CC -shared"
+                fi
+            fi ;;
+	*-*-irix5*) LDSHARED="ld -shared";;
+	*-*-irix6*) LDSHARED="ld ${SGI_ABI} -shared -all";;
+	*-*-sunos4*) LDSHARED="ld";;
+	*-*-solaris*) LDSHARED="ld -G";;
+	*-*-hp*) LDSHARED="ld -b";;
+	*-*-osf*) LDSHARED="ld -shared -expect_unresolved \"*\"";;
+	*-sequent-sysv4) LDSHARED="ld -G";;
+	*-*-next*)
+		if test "$ns_dyld"
+		then LDSHARED='$(CC) $(LDFLAGS) -bundle -prebind'
+		else LDSHARED='$(CC) $(CFLAGS) -nostdlib -r';
+		fi
+                if test "$with_next_framework" ; then
+		    LDSHARED="$LDSHARED \$(LDLIBRARY)"
+		fi ;;
+	*-*-linux*) LDSHARED="gcc -shared";;
+	*-*-dgux*) LDSHARED="ld -G";;
+	*-*-freebsd3*) LDSHARED="gcc -shared";;
+	*-*-freebsd* | *-*-openbsd*) LDSHARED="ld -Bshareable";;
+	*-*-netbsd*)
+		if [[ "`$CC -dM -E - </dev/null | grep __ELF__`" != "" ]]
+		then
+			LDSHARED="cc -shared"
+		else
+			LDSHARED="ld -Bshareable"
+		fi;;
+	*-sco-sysv*) LDSHARED="cc -G -KPIC -Ki486 -belf -Wl,-Bexport";;
+	*-*-darwin*) LDSHARED="cc -bundle -undefined suppress -flat_namespace";;
+	*)	LDSHARED="ld";;
+	esac
+fi
+AC_MSG_RESULT($LDSHARED)
+# CXXSHARED is the ld *command* used to create C++ shared library
+# -- "ld" on SunOS 4.x.x, "ld -G" on SunOS 5.x, "ld -shared" on IRIX 5
+# (Shared libraries in this instance are shared modules to be loaded into
+# Python, as opposed to building Python itself as a shared library.)
+AC_MSG_CHECKING(CXXSHARED)
+if test -z "$CXXSHARED"
+then
+	CXXSHARED="$LDSHARED"
+fi
+AC_MSG_RESULT($CXXSHARED)
+
+#
+AC_MSG_CHECKING(TRYLINKINGWITHCXX)
+if test -z "$TRYLINKINGWITHCXX"
+then
+	case $host in
+	*-*-solaris*) if test "$GCC" = yes;
+             then TRYLINKINGWITHCXX="CXXSHARED= $CXX -Wl,-G";
+             else TRYLINKINGWITHCXX="CXXSHARED= $CXX -G -L/opt/SUNWspro/lib -lCrun";
+             fi;;
+        *-*-hp*) TRYLINKINGWITHCXX="CXXSHARED= $CXX +z ";;
+        *-*-darwin*) TRYLINKINGWITHCXX="CXXSHARED= $CXX -bundle -undefined suppress -flat_namespace";;
+        *-*-cygwin* | *-*-mingw*)
+            if test "$GCC" = yes; then
+                TRYLINKINGWITHCXX="CXXSHARED= $CXX -shared "
+            else
+                if test "cl" = $CXX ;  then
+                    # Microsoft Visual C++ (MSVC)
+                    TRYLINKINGWITHCXX="CXXSHARED= $CXX -nologo -LD"
+                else
+                    TRYLINKINGWITHCXX="#unknown Windows compiler"
+                fi
+            fi ;;
+        *)       TRYLINKINGWITHCXX="CXXSHARED= $CXX -shared ";;
+        esac
+fi
+AC_MSG_RESULT($TRYLINKINGWITHCXX)
+# CCSHARED are the C *flags* used to create objects to go into a shared
+# library (module) -- this is only needed for a few systems
+AC_MSG_CHECKING(CCSHARED)
+if test -z "$CCSHARED"
+then
+	case $host in
+	*-*-hp*) if test "$GCC" = yes;
+		 then CCSHARED="-fpic";
+		 else CCSHARED="+z";
+		 fi;;
+	*-*-linux*) CCSHARED="-fpic";;
+	*-*-freebsd* | *-*-openbsd*) CCSHARED="-fpic";;
+	*-*-netbsd*) CCSHARED="-fPIC";;
+	*-sco-sysv*) CCSHARED="-KPIC -dy -Bdynamic";;
+	*-*-irix6*)  case $CC in
+		   *gcc*) CCSHARED="-shared";;
+		   *) CCSHARED="";;
+		   esac;;
+	esac
+fi
+AC_MSG_RESULT($CCSHARED)
+
+# RPATH is the path used to look for shared library files.
+AC_MSG_CHECKING(RPATH)
+if test -z "$RPATH"
+then
+	case $host in
+	*-*-solaris*) RPATH='-R. -R$(exec_prefix)/lib';;
+        *-*-irix*) RPATH='-rpath .:$(exec_prefix)/lib';;
+	*-*-linux*) RPATH='-Xlinker -rpath $(exec_prefix)/lib -Xlinker -rpath .';;
+	*)	RPATH='';;
+	esac
+fi
+AC_MSG_RESULT($RPATH)
+AC_SUBST(RPATH)
+
+# LINKFORSHARED are the flags passed to the $(CC) command that links
+# the a few executables -- this is only needed for a few systems
+
+AC_MSG_CHECKING(LINKFORSHARED)
+if test -z "$LINKFORSHARED"
+then
+	case $host in
+	*-*-aix*)	LINKFORSHARED='-Wl,-bE:$(srcdir)/python.exp -lld';;
+	*-*-hp*)
+	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
+	*-*-linux*) LINKFORSHARED="-Xlinker -export-dynamic";;
+	*-*-next*) LINKFORSHARED="-u libsys_s";;
+	*-sco-sysv*) LINKFORSHARED="-Bdynamic -dy -Wl,-Bexport";;
+	*-*-irix6*) LINKFORSHARED="-all";;
+	esac
+fi
+AC_MSG_RESULT($LINKFORSHARED)
+
+# This variation is needed on OS-X because there is no (apparent) consistency in shared libary naming.
+# Sometimes .bundle works, but sometimes .so is needed.  It depends on the target language
+
+AC_SUBST(PYTHON_SO)
+case $host in
+   *-*-darwin*) PYTHON_SO=.so;;
+   *) PYTHON_SO=$SO;;
+esac
+
+AC_SUBST(TCL_SO)
+case $host in
+   *-*-darwin*) TCL_SO=.dylib;;
+   *) TCL_SO=$SO;;
+esac
+
+AC_SUBST(GUILE_SO)
+case $host in
+   *-*-darwin*) GUILE_SO=.so;;
+   *) GUILE_SO=$SO;;
+esac
+
+AC_SUBST(PHP4_SO)
+case $host in
+   *-*-darwin*) PHP4_SO=.so;;
+   *) PHP4_SO=$SO;;
+esac
+
+AC_SUBST(MZSCHEME_SO)
+case $host in
+   *) MZSCHEME_SO=.so;;
+esac
+
+AC_SUBST(TCL_LDSHARED)
+case $host in
+   *-*-darwin*) TCL_LDSHARED="gcc -dynamiclib -flat_namespace -undefined suppress";;
+   *) TCL_LDSHARED=$LDSHARED;;
+esac
+
+AC_SUBST(TCL_CXXSHARED)
+case $host in
+   *-*-darwin*) TCL_CXXSHARED="g++ -dynamiclib -flat_namespace -undefined suppress";;
+   *) TCL_CXXSHARED=$TRYLINKINGWITHCXX;;
+esac
+
+# On Mac OS-X, the -no-defined option to libtool doesn't seem to work.
+# This fixes it
+
+AC_SUBST(LIBTOOL_NO_UNDEFINED)
+case $host in
+   *-*-darwin*) LIBTOOL_NO_UNDEFINED="";;
+   *) LIBTOOL_NO_UNDEFINED="-no-undefined";;
+esac
+
+# Optional CFLAGS used to silence compiler warnings on some platforms.
+
+AC_SUBST(PLATFLAGS)
+case $host in
+   *-*-darwin*) PLATFLAGS="-Wno-long-double";;
+   *) PLATFLAGS="";;
+esac
+
+
+
+echo ""
+echo "Checking for installed packages."
+echo "Note : None of the following packages are required to compile SWIG"
+echo ""
+
+# Check for specific libraries.   Used for SWIG examples
+AC_CHECK_LIB(dl, dlopen)	# Dynamic linking for SunOS/Solaris and SYSV
+AC_CHECK_LIB(dld, shl_load)	# Dynamic linking for HP-UX
+
+# The following three (nsl,inet,socket) are needed on Sequent;
+# the order of checking must be this.  Most SVR4 platforms will
+# need -lsocket and -lnsl.  However on SGI IRIX 5, these exist but
+# broken.  I see no elegant solution (probably CHECK_LIB should be
+# fixed to only add the library if the given entry point is not
+# satisfied without it).
+case $host in
+*-*-irix*)
+AC_CHECK_LIB(nsl, t_open, [LIBS="-lnsl $LIBS"]) # SVR4
+AC_CHECK_LIB(inet, gethostbyname, [LIBS="-linet $LIBS"], [], -lnsl) # Sequent
+AC_CHECK_LIB(socket, socket, [LIBS="-lsocket $LIBS"], [], $LIBS) # SVR4 sockets
+;;
+esac
+
+
+AC_CHECK_LIB(swill, swill_init, [SWIGLIBS="-lswill $LIBS" SWILL="-DSWIG_SWILL"])
+AC_SUBST(SWIGLIBS)
+AC_SUBST(SWILL)
+
+# check for --with-libm=...
+AC_SUBST(LIBM)
+LIBM=-lm
+AC_ARG_WITH(libm, [  --with-libm=STRING      math library], [
+if test "$withval" != yes
+then LIBM=$withval
+else AC_MSG_ERROR([proper usage is --with-libm=STRING])
+fi])
+AC_CHECK_LIB(ieee, main, [LIBM="-lieee $LIBM"])
+AC_CHECK_LIB(crypt,crypt, [LIBCRYPT="-lcrypt"])
+AC_SUBST(LIBCRYPT)
+
+# check for --with-libc=...
+AC_SUBST(LIBC)
+AC_ARG_WITH(libc, [  --with-libc=STRING      C library], [
+if test "$withval" != yes
+then LIBC=$withval
+else AC_MSG_ERROR([proper usage is --with-libc=STRING])
+fi])
+
+#--------------------------------------------------------------------
+#	Locate the X11 header files and the X11 library archive.  Try
+#	the ac_path_x macro first, but if it doesn't find the X stuff
+#	(e.g. because there's no xmkmf program) then check through
+#	a list of possible directories.  Under some conditions the
+#	autoconf macro will return an include directory that contains
+#	no include files, so double-check its result just to be safe.
+#--------------------------------------------------------------------
+
+AC_PATH_X
+not_really_there=""
+if test "$no_x" = ""; then
+    if test "$x_includes" = ""; then
+	AC_TRY_CPP([#include <X11/XIntrinsic.h>], , not_really_there="yes")
+    else
+	if test ! -r $x_includes/X11/Intrinsic.h; then
+	    not_really_there="yes"
+	fi
+    fi
+fi
+if test "$no_x" = "yes" -o "$not_really_there" = "yes"; then
+    AC_MSG_CHECKING(for X11 header files)
+    XINCLUDES="# no special path needed"
+    AC_TRY_CPP([#include <X11/Intrinsic.h>], , XINCLUDES="")
+    if test -z "$XINCLUDES"; then
+        dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include /usr/X11/include /usr/sww/include /usr/X11R6/include /usr/include/X11R6"
+        for i in $dirs ; do
+	    if test -r $i/X11/Intrinsic.h; then
+		AC_MSG_RESULT($i)
+	        XINCLUDES=" -I$i"
+		break
+	    fi
+        done
+    fi
+else
+    if test "$x_includes" != ""; then
+	XINCLUDES=-I$x_includes
+    else
+	XINCLUDES="# no special path needed"
+    fi
+fi
+if test -z "$XINCLUDES"; then
+    AC_MSG_RESULT(couldn't find any!)
+    XINCLUDES="# no include files found"
+fi
+
+if test "$no_x" = yes; then
+    AC_MSG_CHECKING(for X11 libraries)
+    XLIBSW=
+    dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/X11R6/lib /usr/lib/X11R6 /usr/openwin/lib /usr/X11/lib /usr/sww/X11/lib"
+    for i in $dirs ; do
+	if test -r $i/libX11.a -o -r $i/libX11.so -o -r $i/libX11.sl; then
+	    AC_MSG_RESULT($i)
+	    XLIBSW="-L$i -lX11"
+	    break
+	fi
+    done
+else
+    if test "$x_libraries" = ""; then
+	XLIBSW=-lX11
+    else
+	XLIBSW="-L$x_libraries -lX11"
+    fi
+fi
+if test -z "$XLIBSW" ; then
+    AC_CHECK_LIB(Xwindow, XCreateWindow, XLIBSW=-lXwindow)
+fi
+if test -z "$XLIBSW" ; then
+    AC_MSG_RESULT(couldn't find any!  Using -lX11.)
+    XLIBSW=-lX11
+fi
+
+AC_SUBST(XINCLUDES)
+AC_SUBST(XLIBSW)
+
+
+#--------------------------------------------------------------------
+#	Try to locate the Tcl package
+#--------------------------------------------------------------------
+
+TCLINCLUDE=
+TCLLIB=
+TCLPACKAGE=
+
+AC_ARG_WITH(tclconfig,[  --with-tclconfig=path   Set location of tclConfig.sh],
+        with_tclconfig="$withval")
+AC_ARG_WITH(tcl,[  --with-tcl=path         Set location of Tcl package],[
+	TCLPACKAGE="$withval"], [TCLPACKAGE=])
+AC_ARG_WITH(tclincl,[  --with-tclincl=path     Set location of Tcl include directory],[
+	TCLINCLUDE="$ISYSTEM$withval"], [TCLINCLUDE=])
+AC_ARG_WITH(tcllib,[  --with-tcllib=path      Set location of Tcl library directory],[
+	TCLLIB="-L$withval"], [TCLLIB=])
+
+AC_MSG_CHECKING([for Tcl configuration])
+# First check to see if --with-tclconfig was specified.
+if test x"${with_tclconfig}" != x ; then
+   if test -f "${with_tclconfig}/tclConfig.sh" ; then
+      TCLCONFIG=`(cd ${with_tclconfig}; pwd)`
+   else
+      AC_MSG_ERROR([${with_tcl} directory doesn't contain tclConfig.sh])
+   fi
+fi
+# check in a few common install locations
+if test x"${TCLCONFIG}" = x ; then
+    for i in `ls -d /usr/lib 2>/dev/null` \
+	    `ls -d /usr/local/lib 2>/dev/null` ; do
+	if test -f "$i/tclConfig.sh" ; then
+	    TCLCONFIG=`(cd $i; pwd)`
+	    break
+	fi
+    done
+fi
+if test x"${TCLCONFIG}" = x ; then
+    AC_MSG_RESULT(no)
+else
+    AC_MSG_RESULT(found $TCLCONFIG/tclConfig.sh)
+    . $TCLCONFIG/tclConfig.sh
+    if test -z "$TCLINCLUDE"; then
+        TCLINCLUDE=$ISYSTEM$TCL_PREFIX/include
+    fi
+    if test -z "$TCLLIB"; then
+        TCLLIB=$TCL_LIB_SPEC
+    fi
+fi
+
+if test -z "$TCLINCLUDE"; then
+   if test -n "$TCLPACKAGE"; then
+	TCLINCLUDE="$ISYSTEM$TCLPACKAGE/include"
+   fi
+fi
+
+if test -z "$TCLLIB"; then
+   if test -n "$TCLPACKAGE"; then
+	TCLLIB="-L$TCLPACKAGE/lib -ltcl"
+   fi
+fi
+
+AC_MSG_CHECKING(for Tcl header files)
+if test -z "$TCLINCLUDE"; then
+AC_TRY_CPP([#include <tcl.h>], , TCLINCLUDE="")
+if test -z "$TCLINCLUDE"; then
+	dirs="/usr/local/include /usr/include /opt/local/include"
+	for i in $dirs ; do
+		if test -r $i/tcl.h; then
+			AC_MSG_RESULT($i)
+			TCLINCLUDE="$ISYSTEM$i"
+			break
+		fi
+	done
+fi
+if test -z "$TCLINCLUDE"; then
+    	AC_MSG_RESULT(not found)
+fi
+else
+        AC_MSG_RESULT($TCLINCLUDE)
+fi
+
+AC_MSG_CHECKING(for Tcl library)
+if test -z "$TCLLIB"; then
+dirs="/usr/local/lib /usr/lib /opt/local/lib"
+for i in $dirs ; do
+	if test -r $i/libtcl.a; then
+	    AC_MSG_RESULT($i)
+	    TCLLIB="-L$i -ltcl"
+	    break
+	fi
+done
+if test -z "$TCLLIB"; then
+	AC_MSG_RESULT(not found)
+fi
+else
+AC_MSG_RESULT($TCLLIB)
+fi
+
+# Cygwin (Windows) needs the library for dynamic linking
+case $host in
+*-*-cygwin* | *-*-mingw*) TCLDYNAMICLINKING="$TCLLIB";;
+*)TCLDYNAMICLINKING="";;
+esac
+
+AC_SUBST(TCLINCLUDE)
+AC_SUBST(TCLLIB)
+AC_SUBST(TCLDYNAMICLINKING)
+
+#----------------------------------------------------------------
+# Look for Python
+#----------------------------------------------------------------
+
+PYINCLUDE=
+PYLIB=
+PYPACKAGE=
+
+# I don't think any of this commented stuff works anymore
+
+#PYLINK="-lModules -lPython -lObjects -lParser"
+
+#AC_ARG_WITH(py,[  --with-py=path          Set location of Python],[
+#	PYPACKAGE="$withval"], [PYPACKAGE=])
+#AC_ARG_WITH(pyincl,[  --with-pyincl=path      Set location of Python include directory],[
+#	PYINCLUDE="$withval"], [PYINCLUDE=])
+#AC_ARG_WITH(pylib,[  --with-pylib=path       Set location of Python library directory],[
+#	PYLIB="$withval"], [PYLIB=])
+
+#if test -z "$PYINCLUDE"; then
+#   if test -n "$PYPACKAGE"; then
+#	PYINCLUDE="$PYPACKAGE/include"
+#   fi
+#fi
+
+#if test -z "$PYLIB"; then
+#   if test -n "$PYPACKAGE"; then
+#	PYLIB="$PYPACKAGE/lib"
+#   fi
+#fi
+
+AC_ARG_WITH(python,[  --with-python=path      Set location of Python executable],[ PYBIN="$withval"], [PYBIN=])
+
+# First figure out the name of the Python executable
+
+if test -z "$PYBIN"; then
+AC_CHECK_PROGS(PYTHON, python python2.4 python2.3 python2.2 python2.1 python2.0 python1.6 python1.5 python1.4 python)
+else
+PYTHON="$PYBIN"
+fi
+
+if test -n "$PYTHON"; then
+    AC_MSG_CHECKING(for Python prefix)
+    PYPREFIX=`($PYTHON -c "import sys; print sys.prefix") 2>/dev/null`
+    AC_MSG_RESULT($PYPREFIX)
+    AC_MSG_CHECKING(for Python exec-prefix)
+    PYEPREFIX=`($PYTHON -c "import sys; print sys.exec_prefix") 2>/dev/null`
+    AC_MSG_RESULT($PYEPREFIX)
+
+
+    # Note: I could not think of a standard way to get the version string from different versions.
+    # This trick pulls it out of the file location for a standard library file.
+
+    AC_MSG_CHECKING(for Python version)
+
+    # Need to do this hack since autoconf replaces __file__ with the name of the configure file
+    filehack="file__"
+    PYVERSION=`($PYTHON -c "import string,operator,os.path; print operator.getitem(os.path.split(operator.getitem(os.path.split(string.__$filehack),0)),1)")`
+    AC_MSG_RESULT($PYVERSION)
+
+    # Set the include directory
+
+    AC_MSG_CHECKING(for Python header files)
+    if test -r $PYPREFIX/include/$PYVERSION/Python.h; then
+        PYINCLUDE="-I$PYPREFIX/include/$PYVERSION -I$PYEPREFIX/lib/$PYVERSION/config"
+    fi
+    if test -z "$PYINCLUDE"; then
+        if test -r $PYPREFIX/include/Py/Python.h; then
+            PYINCLUDE="-I$PYPREFIX/include/Py -I$PYEPREFIX/lib/python/lib"
+        fi
+    fi
+    AC_MSG_RESULT($PYINCLUDE)
+
+    # Set the library directory blindly.   This probably won't work with older versions
+    AC_MSG_CHECKING(for Python library)
+    dirs="$PYVERSION/config $PYVERSION/lib python/lib"
+    for i in $dirs; do
+        if test -d $PYEPREFIX/lib/$i; then
+           PYLIB="$PYEPREFIX/lib/$i"
+           break
+        fi
+    done
+    if test -z "$PYLIB"; then
+        AC_MSG_RESULT(Not found)
+    else
+        AC_MSG_RESULT($PYLIB)
+    fi
+
+    # Check for really old versions
+    if test -r $PYLIB/libPython.a; then
+         PYLINK="-lModules -lPython -lObjects -lParser"
+    else
+         PYLINK="-l$PYVERSION"
+    fi
+fi
+
+# Cygwin (Windows) needs the library for dynamic linking
+case $host in
+*-*-cygwin* | *-*-mingw*) PYTHONDYNAMICLINKING="-L$PYLIB $PYLINK"
+         PYINCLUDE="-DUSE_DL_IMPORT $PYINCLUDE"
+         ;;
+*)PYTHONDYNAMICLINKING="";;
+esac
+
+
+AC_SUBST(PYINCLUDE)
+AC_SUBST(PYLIB)
+AC_SUBST(PYLINK)
+AC_SUBST(PYTHONDYNAMICLINKING)
+
+#----------------------------------------------------------------
+# Look for Perl5
+#----------------------------------------------------------------
+
+PERLBIN=
+
+AC_ARG_WITH(perl5,[  --with-perl5=path       Set location of Perl5 executable],[ PERLBIN="$withval"], [PERLBIN=])
+
+# First figure out what the name of Perl5 is
+
+if test -z "$PERLBIN"; then
+AC_CHECK_PROGS(PERL, perl perl5.6.1 perl5.6.0 perl5.004 perl5.003 perl5.002 perl5.001 perl5 perl)
+else
+PERL="$PERLBIN"
+fi
+
+
+AC_MSG_CHECKING(for Perl5 header files)
+if test -n "$PERL"; then
+	PERL5DIR=`($PERL -e 'use Config; print $Config{archlib};') 2>/dev/null`
+	if test "$PERL5DIR" != ""; then
+		dirs="$PERL5DIR $PERL5DIR/CORE"
+		PERL5EXT=none
+		for i in $dirs; do
+			if test -r $i/perl.h; then
+				AC_MSG_RESULT($i)
+				PERL5EXT="$i"
+				break;
+			fi
+		done
+		if test "$PERL5EXT" = none; then
+			PERL5EXT="$PERL5DIR/CORE"
+			AC_MSG_RESULT(could not locate perl.h...using $PERL5EXT)
+		fi
+
+		AC_MSG_CHECKING(for Perl5 library)
+		PERL5LIB=`($PERL -e 'use Config; $_=$Config{libperl}; s/^lib//; s/$Config{_a}$//; print $_') 2>/dev/null`
+		if test "$PERL5LIB" = "" ; then
+			AC_MSG_RESULT(not found)
+		else
+			AC_MSG_RESULT($PERL5LIB)
+		fi
+    AC_MSG_CHECKING(for Perl5 compiler options)
+ 		PERL5CCFLAGS=`($PERL -e 'use Config; print $Config{ccflags}' | sed "s/-I/$ISYSTEM/") 2>/dev/null`
+ 		if test "$PERL5CCFLAGS" = "" ; then
+ 			AC_MSG_RESULT(not found)
+ 		else
+ 			AC_MSG_RESULT($PERL5CCFLAGS)
+ 		fi
+	else
+		AC_MSG_RESULT(unable to determine perl5 configuration)
+		PERL5EXT=$PERL5DIR
+	fi
+else
+       	AC_MSG_RESULT(could not figure out how to run perl5)
+fi
+
+# Cygwin (Windows) needs the library for dynamic linking
+case $host in
+*-*-cygwin* | *-*-mingw*) PERL5DYNAMICLINKING="-L$PERL5EXT -l$PERL5LIB";;
+*)PERL5DYNAMICLINKING="";;
+esac
+
+AC_SUBST(PERL)
+AC_SUBST(PERL5EXT)
+AC_SUBST(PERL5DYNAMICLINKING)
+AC_SUBST(PERL5LIB)
+AC_SUBST(PERL5CCFLAGS)
+
+#----------------------------------------------------------------
+# Look for java
+#----------------------------------------------------------------
+
+AC_ARG_WITH(java, [  --with-java=path        Set location of Java executable],[JAVABIN="$withval"], [JAVABIN=])
+AC_ARG_WITH(javac, [  --with-javac=path       Set location of Javac executable],[JAVACBIN="$withval"], [JAVACBIN=])
+
+if test -z "$JAVABIN" ; then
+  AC_CHECK_PROGS(JAVA, java kaffe guavac)
+else
+  JAVA="$JAVABIN"
+fi
+
+if test -z "$JAVACBIN" ; then
+  AC_CHECK_PROGS(JAVAC, javac)
+else
+  JAVAC="$JAVACBIN"
+fi
+
+AC_MSG_CHECKING(for java include file jni.h)
+AC_ARG_WITH(javaincl, [  --with-javaincl=path    Set location of Java include directory], [JAVAINCDIR="$withval"], [JAVAINCDIR=])
+
+if test -z "$JAVAINCDIR"; then
+  JAVAINCDIR="/usr/j2sdk*/include /usr/local/j2sdk*/include /usr/jdk*/include /usr/local/jdk*/include /opt/j2sdk*/include /opt/jdk*/include /usr/java/include /usr/java/j2sdk*/include /usr/java/jdk*/include /usr/local/java/include /opt/java/include /usr/include/java /usr/local/include/java /usr/lib/java/include /usr/include/kaffe /usr/local/include/kaffe"
+
+  # Add in default installation directory on Windows for Cygwin
+  case $host in
+  *-*-cygwin* | *-*-mingw*) JAVAINCDIR="c:/j2sdk*/include d:/j2sdk*/include c:/jdk*/include d:/jdk*/include $JAVAINCDIR";;
+  *-*-darwin*) JAVAINCDIR="/System/Library/Frameworks/JavaVM.framework/Headers $JAVAINCDIR";;
+  *);;
+  esac
+fi
+
+JAVAINC=""
+for d in $JAVAINCDIR ; do
+  if test -r $d/jni.h ; then
+    AC_MSG_RESULT($d)
+    JAVAINCDIR=$d
+    JAVAINC="-I$d"
+    break
+  fi
+done
+
+if test "$JAVAINC" = "" ; then
+  AC_MSG_RESULT(not found)
+else
+  # now look for <arch>/jni_md.h
+  AC_MSG_CHECKING(for java include file jni_md.h)
+  JAVAMDDIR=`find $JAVAINCDIR -follow -name jni_md.h -print`
+  if test "$JAVAMDDIR" = "" ; then
+    AC_MSG_RESULT(not found)
+  else
+    JAVAMDDIR=`dirname $JAVAMDDIR`
+    JAVAINC="${JAVAINC} -I$JAVAMDDIR"
+    AC_MSG_RESULT($JAVAMDDIR)
+  fi
+fi
+
+# java.exe on Cygwin requires the Windows standard (Pascal) calling convention as it is a normal Windows executable and not a Cygwin built executable
+case $host in
+*-*-cygwin* | *-*-mingw*)
+    if test "$GCC" = yes; then
+        JAVADYNAMICLINKING=" -mno-cygwin -Wl,--add-stdcall-alias"
+    else
+        JAVADYNAMICLINKING=""
+    fi ;;
+*-*-darwin*) JAVADYNAMICLINKING="-dynamiclib -framework JavaVM";;
+*)JAVADYNAMICLINKING="";;
+esac
+
+# Java on Windows platforms including Cygwin doesn't use libname.dll, rather name.dll when loading dlls
+case $host in
+*-*-cygwin* | *-*-mingw*) JAVALIBRARYPREFIX="";;
+*)JAVALIBRARYPREFIX="lib";;
+esac
+
+# Java on Mac OS X tweaks
+case $host in
+*-*-darwin*) 
+    JAVASO=".jnilib"
+    JAVALDSHARED='$(CC)'
+    JAVACXXSHARED='$(CXX)'
+    ;;
+*)
+    JAVASO=$SO
+    JAVALDSHARED='$(LDSHARED)'
+    JAVACXXSHARED='$(CXXSHARED)'
+    ;;
+esac
+
+AC_SUBST(JAVA)
+AC_SUBST(JAVAC)
+AC_SUBST(JAVAINC)
+AC_SUBST(JAVADYNAMICLINKING)
+AC_SUBST(JAVALIBRARYPREFIX)
+AC_SUBST(JAVASO)
+AC_SUBST(JAVALDSHARED)
+AC_SUBST(JAVACXXSHARED)
+
+#----------------------------------------------------------------
+# Look for Guile
+#----------------------------------------------------------------
+
+GUILEPACKAGE=
+GUILEINCLUDE=
+GUILE=
+GUILELIB=
+GUILELINK=
+
+AC_ARG_WITH(guile-config,[  --with-guile-config=path   Set location of guile-config],[ GUILE_CONFIG="$withval"], [GUILE_CONFIG=])
+
+if test -z "$GUILE_CONFIG" ; then
+  AC_PATH_PROG(GUILE_CONFIG, guile-config)
+fi
+
+if test -n "$GUILE_CONFIG" ; then
+  GUILEPACKAGE="`$GUILE_CONFIG info prefix`"
+  GUILEINCLUDE="`$GUILE_CONFIG info includedir`"
+  GUILELIB="`$GUILE_CONFIG info libdir`"
+  GUILE="`$GUILE_CONFIG info bindir`/guile"
+  GUILELINK="`$GUILE_CONFIG link`"
+fi
+
+AC_ARG_WITH(guilepackage,[  --with-guile-prefix=path       Set location of Guile tree],[
+	GUILEPACKAGE="$withval"])
+
+  if test -z "$GUILE"; then
+     if test -n "$GUILEPACKAGE"; then
+  	GUILE="$GUILEPACKAGE/bin/guile"
+     fi
+  fi
+
+  if test -z "$GUILEINCLUDE"; then
+     if test -n "$GUILEPACKAGE"; then
+  	GUILEINCLUDE="$GUILEPACKAGE/include"
+     fi
+  fi
+
+  if test -z "$GUILELIB"; then
+     if test -n "$GUILEPACKAGE"; then
+  	GUILELIB="$GUILEPACKAGE/lib"
+     fi
+  fi
+
+AC_ARG_WITH(guile,[  --with-guile=path       Set location of Guile executable],[
+	GUILE="$withval"])
+AC_ARG_WITH(guileincl,[  --with-guileincl=path   Set location of Guile include directory],[
+	GUILEINCLUDE="$withval"])
+AC_ARG_WITH(guilelib,[  --with-guilelib=path    Set location of Guile library directory],[
+	GUILELIB="$withval"])
+
+AC_MSG_CHECKING(for Guile header files)
+
+  dirs="$GUILEINCLUDE"
+  for i in $dirs ; do
+  	if test -r $i/guile/gh.h; then
+  		AC_MSG_RESULT($i)
+  		GUILEINCLUDE="$ISYSTEM$i"
+  		break
+  	fi
+  done
+  if test -z "$GUILEINCLUDE"; then
+      	AC_MSG_RESULT(not found)
+  fi
+
+  AC_MSG_CHECKING(for Guile library)
+  dirs="$GUILELIB"
+  for i in $dirs ; do
+  	if test -r $i/libguile.so; then
+  	    AC_MSG_RESULT($i)
+  	    GUILELIB="$i"
+  	    break
+  	fi
+  done
+  if test -z "$GUILELIB"; then
+  	AC_MSG_RESULT(not found)
+  fi
+
+if test -z "$GUILELINK"; then
+  GUILELINK="-L$GUILELIB -lguile"
+fi
+
+AC_SUBST(GUILE)
+AC_SUBST(GUILEINCLUDE)
+AC_SUBST(GUILELIB)
+AC_SUBST(GUILELINK)
+
+guilesafe_CFLAGS=$CFLAGS
+guilesafe_LDFLAGS=$LDFLAGS
+CFLAGS="$CFLAGS $GUILEINCLUDE"
+LDFLAGS="$LDFLAGS $GUILELINK"
+
+AC_MSG_CHECKING(whether Guile's gh_ API works)
+AC_LINK_IFELSE([#include <guile/gh.h>
+  int main() { SCM s; return gh_scm2int(s); }], GUILE_GH_INTERFACE=1, )
+if test -n "$GUILE_GH_INTERFACE" ; then
+        AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+fi
+AC_MSG_CHECKING(whether Guile's SCM_ API works)
+AC_LINK_IFELSE([#include <libguile.h>
+  int main() { SCM s; scm_slot_exists_p(SCM_BOOL_F, SCM_BOOL_F); return SCM_STRING_LENGTH(s); }], GUILE_SCM_INTERFACE=1, )
+if test -n "$GUILE_SCM_INTERFACE" ; then
+        AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+fi
+CFLAGS=$guilesafe_CFLAGS
+LDFLAGS=$guilesafe_LDFLAGS
+
+AM_CONDITIONAL(GUILE_GH_INTERFACE, test -n "$GUILE_GH_INTERFACE")
+AC_SUBST(GUILE_GH_INTERFACE)
+AM_CONDITIONAL(GUILE_SCM_INTERFACE, test -n "$GUILE_SCM_INTERFACE")
+AC_SUBST(GUILE_SCM_INTERFACE)
+
+#----------------------------------------------------------------
+# Look for MzScheme
+#----------------------------------------------------------------
+
+AC_PATH_PROG(MZC, mzc)
+AC_PATH_PROG(MZSCHEME, mzscheme)
+
+if test -n "$MZSCHEME"; then
+AC_MSG_CHECKING(for MzScheme dynext object) 
+MZDYNOBJ=`$MZSCHEME --mute-banner --version --eval '(begin (require (lib "link.ss" "dynext")) (with-handlers (((lambda args #t) (lambda args #f))) (for-each (lambda (x) (display x) (display " ")) ((current-make-standard-link-libraries)))) (with-handlers (((lambda args #t) (lambda args #f))) (for-each (lambda (x) (display x) (display " ")) (expand-for-link-variant (current-standard-link-libraries)))))'`
+AC_MSG_RESULT($MZDYNOBJ)
+fi
+AC_SUBST(MZDYNOBJ)
+
+#----------------------------------------------------------------
+# Look for Ruby
+#----------------------------------------------------------------
+
+RUBYBIN=
+
+AC_ARG_WITH(ruby,[  --with-ruby=path        Set location of Ruby executable],[ RUBYBIN="$withval"], [RUBYBIN=])
+
+# First figure out what the name of Ruby is
+
+if test -z "$RUBYBIN"; then
+	AC_CHECK_PROGS(RUBY, ruby)
+else
+	RUBY="$RUBYBIN"
+fi
+
+AC_MSG_CHECKING(for Ruby header files)
+if test -n "$RUBY"; then
+	RUBYDIR=`($RUBY -rmkmf -e 'print Config::CONFIG[["archdir"]] || $archdir') 2>/dev/null`
+	if test "$RUBYDIR" != ""; then
+		dirs="$RUBYDIR"
+		RUBYINCLUDE=none
+		for i in $dirs; do
+			if test -r $i/ruby.h; then
+				AC_MSG_RESULT($i)
+				RUBYINCLUDE="-I$i"
+				break;
+			fi
+		done
+		if test "$RUBYINCLUDE" = none; then
+			RUBYINCLUDE="-I$RUBYDIR"
+			AC_MSG_RESULT(could not locate ruby.h...using $RUBYINCLUDE)
+		fi
+
+		# Find library and path for linking. Use libruby.a except on Cygwin use the DLL.
+		AC_MSG_CHECKING(for Ruby library)
+		RUBYLIB=""
+		case $host in
+		*-*-cygwin* | *-*-mingw*)
+			rb_libdir=`($RUBY -rrbconfig -e 'print Config::CONFIG[["libdir"]]') 2>/dev/null`
+			rb_bindir=`($RUBY -rrbconfig -e 'print Config::CONFIG[["bindir"]]') 2>/dev/null`
+			dirs="$dirs $rb_libdir $rb_bindir"
+			rb_libruby=`($RUBY -rrbconfig -e 'print Config::CONFIG[["LIBRUBY_SO"]]') 2>/dev/null`
+			RUBYLINK=`($RUBY -rrbconfig -e 'print Config::CONFIG[["RUBY_SO_NAME"]]') 2>/dev/null`
+			;;
+		*)
+			rb_libruby=`($RUBY -rrbconfig -e 'print Config::CONFIG[["LIBRUBY_A"]]') 2>/dev/null`
+			RUBYLINK=`($RUBY -rrbconfig -e 'print Config::CONFIG[["RUBY_INSTALL_NAME"]]') 2>/dev/null`
+			;;
+		esac
+		if test "$rb_libruby" != ""; then
+			for i in $dirs; do
+				if (test -r $i/$rb_libruby;) then
+					RUBYLIB="$i"
+					break;
+				fi
+			done
+		fi
+		if test "$RUBYLIB" = ""; then
+			RUBYLIB="$RUBYDIR"
+			AC_MSG_RESULT(not found... using $RUBYDIR)
+		else
+			AC_MSG_RESULT($RUBYLINK in $RUBYLIB)
+		fi
+	else
+		AC_MSG_RESULT(unable to determine ruby configuration)
+		RUBYINCLUDE="-I$RUBYDIR"
+		RUBYLIB="$RUBYDIR"
+	fi
+	RUBYLINK="-l$RUBYLINK `($RUBY -rrbconfig -e 'print Config::CONFIG[["LIBS"]]') 2>/dev/null`"
+	RUBYCCDLFLAGS=`($RUBY -rrbconfig -e 'print Config::CONFIG[["CCDLFLAGS"]]') 2>/dev/null`
+else
+	AC_MSG_RESULT(could not figure out how to run ruby)
+	RUBYINCLUDE="-I/usr/local/lib/ruby/1.4/arch"
+	RUBYLIB="/usr/local/lib/ruby/1.4/arch"
+	RUBYLINK="-lruby -lm"
+fi
+
+case $host in
+*-*-cygwin* | *-*-mingw*)	RUBYDYNAMICLINKING="-L$RUBYLIB $RUBYLINK";;
+*)		RUBYDYNAMICLINKING="";;
+esac
+
+
+AC_SUBST(RUBYINCLUDE)
+AC_SUBST(RUBYLIB)
+AC_SUBST(RUBYLINK)
+AC_SUBST(RUBYCCDLFLAGS)
+AC_SUBST(RUBYDYNAMICLINKING)
+
+#-------------------------------------------------------------------------
+# Look for Php4
+#-------------------------------------------------------------------------
+
+PHP4BIN=
+
+AC_ARG_WITH(php4,[  --with-php4=path	  Set location of PHP4 executable],[ PHP4BIN="$withval"], [PHP4BIN=])
+
+if test -z "$PHP4BIN"; then
+AC_CHECK_PROGS(PHP4, php php4)
+else
+PHP4="$PHP4BIN"
+fi
+
+AC_SUBST(PHP4)
+
+AC_MSG_CHECKING(for PHP4 header files)
+PHP4CONFIG="${PHP4}-config"
+PHP4INC="`$PHP4CONFIG --includes 2>/dev/null`"
+if test "$PHP4INC"; then
+	AC_MSG_RESULT($PHP4INC)
+else
+	dirs="/usr/include/php /usr/local/include/php /usr/include/php4 /usr/local/include/php4 /usr/local/apache/php"
+	for i in $dirs; do
+		echo $i
+		if test -r $i/php_config.h -o -r $i/php_version.h; then
+			AC_MSG_RESULT($i)
+			PHP4EXT="$i"
+			PHP4INC="-I$PHP4EXT -I$PHP4EXT/Zend -I$PHP4EXT/main -I$PHP4EXT/TSRM"
+			break;
+		fi
+	done
+fi
+if test -z "$PHP4INC"; then
+	AC_MSG_RESULT(not found)
+fi
+
+AC_SUBST(PHP4INC)
+
+( cd $srcdir/Examples/php4 ; for dir in `sed '/^#/d' check.list` ; do
+    test -f $dir/Makefile || ( cd $dir ; ln -s ../Makefile.php Makefile )
+  done )
+
+#----------------------------------------------------------------
+# Look for ocaml
+#----------------------------------------------------------------
+
+AC_ARG_WITH(ocaml,[  --with-ocaml=path       Set location of ocaml executable],[ OCAMLBIN="$withval"], [OCAMLBIN=])
+AC_ARG_WITH(ocamlc,[  --with-ocamlc=path      Set location of ocamlc executable],[ OCAMLC="$withval"], [OCAMLC=])
+AC_ARG_WITH(ocamldlgen,[  --with-ocamldlgen=path  Set location of ocamldlgen],[ OCAMLDLGEN="$withval" ], [OCAMLDLGEN=])
+AC_ARG_WITH(ocamlfind,[  --with-ocamlfind=path   Set location of ocamlfind],[OCAMLFIND="$withval"],[OCAMLFIND=])
+AC_ARG_WITH(ocamlmktop,[  --with-ocamlmktop=path  Set location of ocamlmktop executable],[ OCAMLMKTOP="$withval"], [OCAMLMKTOP=])
+
+AC_MSG_CHECKING(for Ocaml DL load generator)
+if test -z "$OCAMLDLGEN"; then
+AC_CHECK_PROGS(OCAMLDLGEN, ocamldlgen, ocamldlgen)
+else
+OCAMLDLGEN="$OCAMLDLGEN"
+fi
+
+AC_MSG_CHECKING(for Ocaml package tool)
+if test -z "$OCAMLFIND"; then
+AC_CHECK_PROGS(OCAMLFIND, ocamlfind, ocamlfind)
+else
+OCAMLFIND="$OCAMLFIND"
+fi
+
+AC_MSG_CHECKING(for Ocaml compiler)
+if test -z "$OCAMLC"; then
+AC_CHECK_PROGS(OCAMLC, ocamlc, ocamlc)
+else
+OCAMLC="$OCAMLC"
+fi
+
+AC_MSG_CHECKING(for Ocaml interpreter)
+if test -z "$OCAMLBIN"; then
+AC_CHECK_PROGS(OCAMLBIN, ocaml, ocaml)
+else
+OCAMLBIN="$OCAMLBIN"
+fi
+
+AC_MSG_CHECKING(for Ocaml toplevel creator)
+if test -z "$OCAMLMKTOP"; then
+AC_CHECK_PROGS(OCAMLMKTOP, ocamlmktop, ocamlmktop)
+else
+OCAMLMKTOP="$OCAMLMKTOP"
+fi
+
+AC_MSG_CHECKING(for Ocaml header files)
+dirs="/usr/lib/ocaml/caml /usr/local/lib/ocaml/caml"
+dir="`$OCAMLC -where 2>/dev/null`"
+if test "$dir"; then
+	dirs="$dir/caml $dirs"
+fi
+for i in $dirs; do
+	if test -r $i/mlvalues.h; then
+		AC_MSG_RESULT($i)
+		OCAMLEXT="$i"
+		OCAMLINC="-I$OCAMLEXT"
+		break;
+	fi
+done
+if test -z "$OCAMLINC"; then
+	AC_MSG_RESULT(not found)
+fi
+
+export OCAMLINC
+export OCAMLBIN
+export OCAMLC
+export OCAMLDLGEN
+export OCAMLFIND
+export OCAMLMKTOP
+
+AC_SUBST(OCAMLINC)
+AC_SUBST(OCAMLBIN)
+AC_SUBST(OCAMLC)
+AC_SUBST(OCAMLDLGEN)
+AC_SUBST(OCAMLFIND)
+AC_SUBST(OCAMLMKTOP)
+
+#----------------------------------------------------------------
+# Look for Pike
+#----------------------------------------------------------------
+
+# Identify the name of the Pike executable
+PIKEBIN=
+AC_ARG_WITH(pike,[  --with-pike=path        Set location of Pike executable],[ PIKEBIN="$withval"], [PIKEBIN=])
+if test -z "$PIKEBIN"; then
+	AC_CHECK_PROGS(PIKE, pike)
+else
+	PIKE="$PIKEBIN"
+fi
+
+# Check for a --with-pikeincl option to configure
+PIKEINCLUDE=
+AC_ARG_WITH(pikeincl,[  --with-pikeincl=path    Set location of Pike include directory],[
+	PIKEINCLUDE="-I$withval"], [PIKEINCLUDE=])
+
+AC_MSG_CHECKING(for Pike header files)
+if test -z "$PIKEINCLUDE"; then
+if test -n "$PIKE"; then
+	PIKEPATH=`which $PIKE`
+	PIKEINCLUDE=`$PIKE Tools/check-include-path.pike $PIKEPATH`
+ 	AC_MSG_RESULT($PIKEINCLUDE)
+	PIKEINCLUDE="-I$PIKEINCLUDE"
+fi
+if test -z "$PIKEINCLUDE"; then
+    	AC_MSG_RESULT(not found)
+fi
+else
+        AC_MSG_RESULT($PIKEINCLUDE)
+fi
+
+AC_SUBST(PIKEINCLUDE)
+AC_SUBST(PIKECCDLFLAGS)
+AC_SUBST(PIKEDYNAMICLINKING)
+
+#----------------------------------------------------------------
+# Look for CHICKEN
+#----------------------------------------------------------------
+
+CHICKEN=
+CHICKEN_CONFIG=
+CHICKENHOME=
+CHICKENOPTS=
+CHICKENLIB=
+
+
+AC_ARG_WITH(chicken,[  --with-chicken=path     Set location of CHICKEN executable],[ CHICKEN="$withval"], [CHICKEN=])
+
+if test -z "$CHICKEN"; then
+AC_CHECK_PROGS(CHICKEN, chicken)
+else
+CHICKEN="$CHICKEN"
+fi
+
+AC_ARG_WITH(chickencfg,[  --with-chickencfg=path  Set location of chicken-config],[ CHICKEN_CONFIG="$withval"], [CHICKEN_CONFIG=])
+
+if test -z "$CHICKEN_CONFIG"; then
+AC_CHECK_PROGS(CHICKEN_CONFIG, chicken-config)
+else
+CHICKEN_CONFIG="$CHICKEN_CONFIG"
+fi
+
+if test -n "$CHICKEN_CONFIG" ; then
+
+  AC_ARG_WITH(chickenhome,[  --with-chickenhome=path Set location of CHICKEN home directory],[
+	CHICKENHOME="$withval"], [CHICKENHOME=])
+  AC_ARG_WITH(chickensharedopts,[  --with-chickensharedopts=path   Set compiler options for shared CHICKEN generated code],[
+	CHICKENSHAREDOPTS="$withval"], [CHICKENSHAREDOPTS=])
+  AC_ARG_WITH(chickenopts,[  --with-chickenopts=path Set compiler options for static CHICKEN generated code],[
+	CHICKENOPTS="$withval"], [CHICKENOPTS=])
+  AC_ARG_WITH(chickensharedlib,[  --with-chickensharedlib=path    Set linker options for shared CHICKEN generated code],[
+	CHICKENSHAREDLIB="$withval"], [CHICKENSHAREDLIB=])
+  AC_ARG_WITH(chickenlib,[  --with-chickenlib=path  Set linker options for static CHICKEN generated code],[
+	CHICKENLIB="$withval"], [CHICKENLIB=])
+
+  AC_MSG_CHECKING(for CHICKEN home directory)
+  dirs="$CHICKENHOME `chicken-config -home | sed s/CHICKEN_HOME=//`"
+  for i in $dirs ; do
+  	if test -d $i; then
+  		AC_MSG_RESULT($i)
+  		CHICKENHOME="$i"
+  		break
+  	fi
+  done
+  if test -z "$CHICKENHOME"; then
+      	AC_MSG_RESULT(not found)
+  fi
+
+  AC_MSG_CHECKING(for compiler options for shared CHICKEN generated code)
+  if test -z "$CHICKENSHAREDOPTS"; then
+        CHICKENSHAREDOPTS="`chicken-config -shared -cflags`"
+  else
+        CHICKENSHAREDOPTS="`chicken-config -shared -cflags` $CHICKENSHAREDOPTS"
+  fi
+  if test -z "$CHICKENSHAREDOPTS"; then
+        AC_MSG_RESULT(not found)
+  else
+        AC_MSG_RESULT($CHICKENSHAREDOPTS)
+  fi
+
+  AC_MSG_CHECKING(for compiler options for static CHICKEN generated code)
+  if test -z "$CHICKENOPTS"; then
+        CHICKENOPTS="`chicken-config -cflags`"
+  else
+        CHICKENOPTS="`chicken-config -cflags` $CHICKENOPTS"
+  fi
+  if test -z "$CHICKENOPTS"; then
+        AC_MSG_RESULT(not found)
+  else
+        AC_MSG_RESULT($CHICKENOPTS)
+  fi
+
+  AC_MSG_CHECKING(for linker options for shared CHICKEN generated code)
+  dirs="$CHICKENSHAREDLIB `chicken-config -shared -libs -extra-libs | sed s/-L//g` /usr/lib"
+  for i in $dirs ; do
+  	if test -r $i/libchicken.a; then
+  	    AC_MSG_RESULT(libraries found in $i)
+  	    CHICKENSHAREDLIB="$CHICKENSHAREDLIB `chicken-config -shared -extra-libs`"
+  	    CHICKENSHAREDLIB="$CHICKENSHAREDLIB `chicken-config -shared -libs`"
+  	    break
+  	fi
+  done
+  if test -z "$CHICKENSHAREDLIB"; then
+  	AC_MSG_RESULT(not found)
+  fi
+
+  AC_MSG_CHECKING(for linker options for static CHICKEN generated code)
+  dirs="$CHICKENLIB `chicken-config -libs -extra-libs | sed s/-L//g` /usr/lib "
+  for i in $dirs ; do
+  	if test -r $i/libchicken.a; then
+  	    AC_MSG_RESULT(libraries found in $i)
+  	    CHICKENLIB="$CHICKENLIB `chicken-config -extra-libs`"
+  	    CHICKENLIB="$CHICKENLIB `chicken-config -libs`"
+  	    break
+  	fi
+  done
+  if test -z "$CHICKENLIB"; then
+  	AC_MSG_RESULT(not found)
+  fi
+
+fi # have CHICKEN_CONFIG
+
+AC_SUBST(CHICKEN)
+AC_SUBST(CHICKEN_CONFIG)
+AC_SUBST(CHICKENHOME)
+AC_SUBST(CHICKENOPTS)
+AC_SUBST(CHICKENSHAREDOPTS)
+AC_SUBST(CHICKENLIB)
+AC_SUBST(CHICKENSHAREDLIB)
+
+#----------------------------------------------------------------
+# Look for csharp
+#----------------------------------------------------------------
+
+AC_ARG_WITH(cil-interpreter, [  --with-cil-interpreter=path     Set location of CIL interpreter for CSharp],[CSHARPBIN="$withval"], [CSHARPBIN=])
+AC_ARG_WITH(csharp-compiler, [  --with-csharp-compiler=path     Set location of CSharp compiler],[CSHARPCOMPILERBIN="$withval"], [CSHARPCOMPILERBIN=])
+
+if test -z "$CSHARPCOMPILERBIN" ; then
+  case $host in
+  *-*-cygwin* | *-*-mingw*)
+    AC_CHECK_PROGS(CSHARPCOMPILER, mcs.bat cscc csc);;
+  *)AC_CHECK_PROGS(CSHARPCOMPILER, mcs cscc);;
+  esac
+else
+  CSHARPCOMPILER="$CSHARPCOMPILERBIN"
+fi
+
+CSHARPPATHSEPARATOR="/"
+CSHARPCYGPATH_W=echo
+if test -z "$CSHARPBIN" ; then
+  CSHARPCILINTERPRETER=""
+  if test "cscc" = "$CSHARPCOMPILER" ; then
+    AC_CHECK_PROGS(CSHARPCILINTERPRETER, ilrun)
+  else
+    if test "mcs" = "$CSHARPCOMPILER"; then
+      # Check that mcs is the C# compiler and not the Unix mcs utility by examining the output of 'mcs --version'
+      # The Mono compiler should emit: Mono C# compiler version a.b.c.d
+      csharp_version_raw=`(mcs --version) 2>/dev/null`
+      csharp_version_searched=`(mcs --version | sed -n "/C#\|Mono/p") 2>/dev/null`
+      CSHARPCOMPILER="";
+      if test -n "$csharp_version_raw" ; then
+        if test "$csharp_version_raw" = "$csharp_version_searched" ; then
+          CSHARPCOMPILER="mcs"
+        fi
+      fi
+
+      # mono interpreter (ver 0.26 doesn't seem to work on Windows platforms)
+      case $host in
+      *-*-cygwin* | *-*-mingw*)
+        ;;
+      *)AC_CHECK_PROGS(CSHARPCILINTERPRETER, mint);;
+      esac
+    else 
+      if test "csc" = "$CSHARPCOMPILER"; then
+          CSHARPPATHSEPARATOR="\\\\"
+          CSHARPCYGPATH_W='cygpath -w'
+      fi
+    fi
+  fi
+else
+  CSHARPCILINTERPRETER="$CSHARPBIN"
+fi
+
+# Cygwin requires the Windows standard (Pascal) calling convention as it is a Windows executable and not a Cygwin built executable
+case $host in
+*-*-cygwin* | *-*-mingw*)
+    if test "$GCC" = yes; then
+        CSHARPDYNAMICLINKING=" -Wl,--add-stdcall-alias"
+    else
+        CSHARPDYNAMICLINKING=""
+    fi ;;
+*)CSHARPDYNAMICLINKING="";;
+esac
+
+# CSharp on Windows platforms including Cygwin doesn't use libname.dll, rather name.dll when loading dlls
+case $host in
+*-*-cygwin* | *-*-mingw*) CSHARPLIBRARYPREFIX="";;
+*)CSHARPLIBRARYPREFIX="lib";;
+esac
+
+
+AC_SUBST(CSHARPCILINTERPRETER)
+AC_SUBST(CSHARPPATHSEPARATOR)
+AC_SUBST(CSHARPCYGPATH_W)
+AC_SUBST(CSHARPCOMPILER)
+AC_SUBST(CSHARPDYNAMICLINKING)
+AC_SUBST(CSHARPLIBRARYPREFIX) # Is this going to be used?
+
+#----------------------------------------------------------------
+# Determine which languages to use for examples/test-suite and runtime lib
+#----------------------------------------------------------------
+
+SKIP_TCL=
+if test -z "$TCLINCLUDE" || test -z "$TCLLIB" ; then
+    SKIP_TCL="1"
+fi
+AM_CONDITIONAL(SKIP_TCL, test -n "$SKIP_TCL")
+AC_SUBST(SKIP_TCL)
+
+
+SKIP_PERL5=
+if test -z "$PERL" || test -z "$PERL5EXT" ; then
+    SKIP_PERL5="1"
+fi
+AM_CONDITIONAL(SKIP_PERL5, test -n "$SKIP_PERL5")
+AC_SUBST(SKIP_PERL5)
+
+
+SKIP_PYTHON=
+if test -z "$PYINCLUDE" || test -z "$PYLIB" ; then
+    SKIP_PYTHON="1"
+fi
+AM_CONDITIONAL(SKIP_PYTHON, test -n "$SKIP_PYTHON")
+AC_SUBST(SKIP_PYTHON)
+
+
+SKIP_JAVA=
+if test -z "$JAVA" || test -z "$JAVAC" || test -z "$JAVAINC" ; then
+    SKIP_JAVA="1"
+fi
+AM_CONDITIONAL(SKIP_JAVA, test -n "$SKIP_JAVA")
+AC_SUBST(SKIP_JAVA)
+
+
+SKIP_GUILE=
+if test -z "$GUILEINCLUDE" || test -z "$GUILELIB" || test -z "$GUILE_GH_INTERFACE"; then
+    SKIP_GUILE="1"
+fi
+AM_CONDITIONAL(SKIP_GUILE, test -n "$SKIP_GUILE")
+AC_SUBST(SKIP_GUILE)
+
+SKIP_GUILESCM=
+if test -z "$GUILEINCLUDE" || test -z "$GUILELIB" || test -z "$GUILE_SCM_INTERFACE"; then
+    SKIP_GUILESCM="1"
+fi
+AM_CONDITIONAL(SKIP_GUILESCM, test -n "$SKIP_GUILESCM")
+AC_SUBST(SKIP_GUILESCM)
+
+
+SKIP_MZSCHEME=
+if test -z "$MZC" ; then
+    SKIP_MZSCHEME="1"
+fi
+AM_CONDITIONAL(SKIP_MZSCHEME, test -n "$SKIP_MZSCHEME")
+AC_SUBST(SKIP_MZSCHEME)
+
+
+SKIP_RUBY=
+if test -z "$RUBY" || test -z "$RUBYINCLUDE" || test -z "$RUBYLIB" ; then
+    SKIP_RUBY="1"
+fi
+AM_CONDITIONAL(SKIP_RUBY, test -n "$SKIP_RUBY")
+AC_SUBST(SKIP_RUBY)
+
+
+SKIP_PHP4=
+if test -z "$PHP4" || test -z "$PHP4INC" ; then
+    SKIP_PHP4="1"
+fi
+AM_CONDITIONAL(SKIP_PHP4, test -n "$SKIP_PHP4")
+AC_SUBST(SKIP_PHP4)
+
+
+SKIP_OCAML=
+if test -z "$OCAMLBIN" || test -z "$OCAMLINC" ; then
+    SKIP_OCAML="1"
+fi
+AM_CONDITIONAL(SKIP_OCAML, test -n "$SKIP_OCAML")
+AC_SUBST(SKIP_OCAML)
+
+
+SKIP_PIKE="1" # Always skipped!
+if test -z "$PIKE" || test -z "$PIKEINCLUDE" ; then
+    SKIP_PIKE="1"
+fi
+AM_CONDITIONAL(SKIP_PIKE, test -n "$SKIP_PIKE")
+AC_SUBST(SKIP_PIKE)
+
+
+SKIP_CHICKEN=
+if test -z "$CHICKEN" || test -z "$CHICKENHOME" || test -z "$CHICKENLIB" ; then
+    SKIP_CHICKEN="1"
+fi
+AM_CONDITIONAL(SKIP_CHICKEN, test -n "$SKIP_CHICKEN")
+AC_SUBST(SKIP_CHICKEN)
+
+
+SKIP_CSHARP=
+if test -z "$CSHARPCOMPILER" ; then
+    SKIP_CSHARP="1"
+else
+    if test "cscc" = "$CSHARPCOMPILER" && test -z "$CSHARPCILINTERPRETER" ; then
+      SKIP_CSHARP="1"
+    fi
+fi
+AM_CONDITIONAL(SKIP_CSHARP, test -n "$SKIP_CSHARP")
+AC_SUBST(SKIP_CSHARP)
+
+#----------------------------------------------------------------
+# Miscellaneous
+#----------------------------------------------------------------
+
+# Root directory
+# Translate path for native Windows compilers for use with 'make check'
+ROOT_DIR=`pwd`
+case $host in
+*-*-cygwin* | *-*-mingw*)
+  if (cygpath --mixed $ROOT_DIR) >/dev/null 2>/dev/null; then
+    ROOT_DIR=`cygpath --mixed $ROOT_DIR`
+  fi
+  # Extra files generated by some Windows compilers
+  EXTRA_CLEAN="*.stackdump *.exp *.lib"
+  ;;
+esac
+
+AC_SUBST(ROOT_DIR)
+AC_SUBST(EXTRA_CLEAN)
+AC_SUBST(ac_aux_dir)
+
+# Configure SWIG_LIB path
+
+AC_ARG_WITH(swiglibdir,[  --with-swiglibdir=DIR   Put SWIG system-independent libraries into DIR.],
+  [swig_lib="$withval"], [swig_lib="${libdir}/swig1.3"])
+AC_SUBST(swig_lib)
+AC_DEFINE_DIR(SWIG_LIB, swig_lib, [Directory for SWIG system-independent libraries])
+
+# Configure RELEASESUFFIX (for setups having both SWIG 1.1 and 1.3 on a system...)
+
+AC_ARG_WITH(release-suffix,
+  [  --with-release-suffix=SUFFIX    Attach SUFFIX to the binary and the runtime libs. ],
+  [release_suffix="$withval"], [release_suffix=""])
+AC_SUBST(release_suffix)
+AC_DEFINE_UNQUOTED(RELEASE_SUFFIX, "$release_suffix", [Executable and runtime libraries release suffix for co-existence with older versions])
+
+release_suffix_libtool=
+if test -n "$release_suffix"; then
+    release_suffix_libtool="-release `echo $release_suffix | sed s/^-//`"
+fi
+AC_SUBST(release_suffix_libtool)
+
+AC_CONFIG_FILES([			        \
+    Makefile				        \
+    Runtime/Makefile			        \
+    Source/Makefile			        \
+    Examples/Makefile			        \
+    Examples/guile/Makefile		        \
+    Examples/GIFPlot/Makefile		        \
+    Examples/GIFPlot/Lib/Makefile	        \
+    Examples/test-suite/chicken/Makefile	\
+    Examples/test-suite/csharp/Makefile	        \
+    Examples/test-suite/guile/Makefile	        \
+    Examples/test-suite/guilescm/Makefile	\
+    Examples/test-suite/java/Makefile	        \
+    Examples/test-suite/mzscheme/Makefile	\
+    Examples/test-suite/ocaml/Makefile	        \
+    Examples/test-suite/perl5/Makefile	        \
+    Examples/test-suite/php4/Makefile	        \
+    Examples/test-suite/pike/Makefile	        \
+    Examples/test-suite/python/Makefile	        \
+    Examples/test-suite/ruby/Makefile	        \
+    Examples/test-suite/tcl/Makefile	        \
+])
+AC_CONFIG_FILES([preinst-swig], [chmod +x preinst-swig])
+AC_OUTPUT
+
+dnl configure.in ends here

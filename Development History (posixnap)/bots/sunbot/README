@@ -1,0 +1,29 @@
+## Installation notes.
+
+I'm not a technical writer but here goes:
+
+databot.pl: Run this on your sun solaris servers 'nohup perl databot.pl'
+
+datacheck.pl: Run this on your data collection point I use cron.
+
+addhost.pl: Use this to add hosts to your postgres database. 
+	Syntax:
+	./addhost.pl hostname
+	
+	* Hostname must be resolveable our you'll get an error.
+
+inti.pl: Used to track server metrics through email.
+	look at the config file (which should go in /etc/inti/config)
+
+htdocs/ : These go in your apache directory. Please change database settings/
+
+
+Which brings me to schema:
+
+addhost.pl creates a table for each host in the database you specify in the dbi line.
+
+Warranty:
+There is no warranty if it newfs' your disks, trashes your files, kills your dog, or causes the destruction of life as we know it, tough titty.
+
+
+

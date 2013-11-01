@@ -1,0 +1,32 @@
+MANIFEST			This list of files
+Makefile.PL
+Mancala/AI/FencedIn.pm
+Mancala/AI/Greedy.pm
+Mancala/AI/Handful.pm
+Mancala/AI/Mean.pm
+Mancala/AI/Minimalist.pm
+Mancala/AI/Random.pm
+Mancala/AI/Simple.pm
+Mancala/Board.pm
+Mancala/Board/Side.pm
+Mancala/Board/Traverser.pm
+Mancala/Board/Traverser/Classic.pm
+Mancala/Cups/Board.pm
+Mancala/Cups/Goal.pm
+Mancala/Cups/Simple.pm
+Mancala/Display/ASCII.pm
+Mancala/Display/Simple.pm
+Mancala/Player/Human.pm
+Mancala/Player/Machine.pm
+Mancala/Player/Simple.pm
+examples/README
+examples/greedy battle.pl
+examples/greedy vs human.pl
+examples/greedy vs random.pl
+examples/handful vs random.pl
+examples/human vs greedy.pl
+examples/minimalist vs random.pl
+examples/random vs greedy.pl
+examples/random vs handful.pl
+examples/random vs minimalist.pl
+modlist

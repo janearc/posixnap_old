@@ -1,0 +1,38 @@
+#!/usr/bin/perl -w
+
+# XXX
+# these values MUST be CHANGED!!!!!!
+# !!!!!!!
+# !!!!!!!
+use constant PET_NAME => 'Lil_Drake43';
+use constant OWNER_NAME => 'narse43';
+
+BEGIN { $|++; $ENV{ACCOUNT} ? print "1..6\n" : ( print "1..0\n" and exit ); }
+END   { print "not ok 1 # modules did not load\n" unless $looks_good }
+
+use strict;
+use warnings;
+use vars qw/$looks_good/;
+$looks_good=1;
+print "ok 1\n";
+
+my ( $pet, $pet_obj );
+
+my $i = 2;
+
+###
+test ( eval { require Neopets::Pet } ? 1 : 0, $i++ );
+test ( $pet = Neopets::Pet -> new(), $i++ );
+test ( $pet_obj = $pet -> current_pet(), $i++ ); 
+test ( $pet_obj = $pet -> lookup_pet( PET_NAME ), $i++ );
+test ( $pet_obj = $pet -> lookup_user_pets( OWNER_NAME ), $i++ );
+
+
+
+exit;
+
+sub test {
+  print $_[0] ? "" : "not ",
+        "ok $_[1]",
+        $_[2] ? " $_[2]" : "", "\n";
+}

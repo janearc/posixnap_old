@@ -1,0 +1,80 @@
+#!/usr/bin/perl -w
+
+BEGIN { $|++; print "1..40\n"; }
+END   { print "not ok 1 # modules did not load\n" unless $looks_good }
+
+use strict;
+use warnings;
+use vars qw/$looks_good/;
+$looks_good=1;
+print "ok 1\n";
+
+my ( $item1, $item2 );
+
+my $i = 2;
+
+###
+test ( eval { require Neopets::Item::Simple } ? 1 : 0, $i++ );
+test ( $item1 = Neopets::Item::Simple -> new(), $i++ );
+
+test ( $item1 -> buyer(1), $i++ );
+test ( $item1 -> date(2), $i++ );
+test ( $item1 -> description(3), $i++ );
+test ( $item1 -> id(4), $i++ );
+test ( $item1 -> location(5), $i++ );
+test ( $item1 -> name(6), $i++ );
+test ( $item1 -> order(7), $i++ );
+test ( $item1 -> owner(8), $i++ );
+test ( $item1 -> price(9), $i++ );
+test ( $item1 -> quantity(10), $i++ );
+test ( $item1 -> referer(11), $i++ );
+test ( $item1 -> type_id(12), $i++ );
+
+test ( $item1 -> buyer() == 1, $i++ );
+test ( $item1 -> date() == 2, $i++ );
+test ( $item1 -> description() == 3, $i++ );
+test ( $item1 -> id() == 4, $i++ );
+test ( $item1 -> location() == 5, $i++ );
+test ( $item1 -> name() == 6, $i++ );
+test ( $item1 -> order() == 7, $i++ );
+test ( $item1 -> owner() == 8, $i++ );
+test ( $item1 -> price() == 9, $i++ );
+test ( $item1 -> quantity() == 10, $i++ );
+test ( $item1 -> referer() == 11, $i++ );
+test ( $item1 -> type_id() == 12, $i++ );
+
+test ( $item2 = Neopets::Item::Simple -> new(
+    { buyer => 1,
+      date => 2,
+      description => 3,
+      id => 4,
+      location => 5,
+      name => 6,
+      order => 7,
+      owner => 8,
+      price => 9,
+      quantity => 10,
+      referer => 11,
+      type_id => 12,
+    } ), $i++ );
+
+test ( $item2 -> buyer() == 1, $i++ );
+test ( $item2 -> date() == 2, $i++ );
+test ( $item2 -> description() == 3, $i++ );
+test ( $item2 -> id() == 4, $i++ );
+test ( $item2 -> location() == 5, $i++ );
+test ( $item2 -> name() == 6, $i++ );
+test ( $item2 -> order() == 7, $i++ );
+test ( $item2 -> owner() == 8, $i++ );
+test ( $item2 -> price() == 9, $i++ );
+test ( $item2 -> quantity() == 10, $i++ );
+test ( $item2 -> referer() == 11, $i++ );
+test ( $item2 -> type_id() == 12, $i++ );
+
+exit;
+
+sub test {
+  print $_[0] ? "" : "not ",
+        "ok $_[1]",
+        $_[2] ? " $_[2]" : "", "\n";
+}

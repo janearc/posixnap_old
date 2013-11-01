@@ -1,0 +1,33 @@
+                    Puzzle Solver
+                by Matt Harrington
+
+    To use this project, follow the instructions in INSTALL
+or set the environment variable $PERL5LIB to the directory
+containing this README file.  This will tell perl to search
+here for modules.  The files listed below are relevant
+to the assignment.
+
+Note: Additional documentation can be found using the
+`perldoc' tool on modules.
+
+Files:
+
+README.shape:
+        This file contains documentation for the
+    shape and bounds checking assigmnent.
+
+README.snafooz:
+        This file lists ideas for solving the snafooz
+    puzzle.
+
+README.graph:
+        This file contains documentation for the
+    graph search assignment.
+
+README.marriage:
+        This file contains an explination of the
+    stable marriage worst case.
+
+README.eurodiffusion:
+        This file contains the documentation for
+    the eurodiffusion simmulation.

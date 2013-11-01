@@ -1,0 +1,47 @@
+#######################################################################
+# $Header: /home/jabba/convert/cvs/Ficl/SWIG-1.3.21/Examples/test-suite/chicken/Makefile.in,v 1.1 2004-02-01 04:02:23 alex Exp $
+# Makefile for chicken test-suite
+#######################################################################
+
+LANGUAGE     = chicken
+VARIANT      = _module
+SCRIPTSUFFIX = _runme.scm
+srcdir       = @srcdir@
+top_srcdir   = @top_srcdir@
+top_builddir = @top_builddir@
+
+#C_TEST_CASES = long_long list_vector pointer_in_out multivalue
+
+include $(srcdir)/../common.mk
+
+# Overridden variables here
+# none!
+
+# Rules for the different types of tests
+%.cpptest: 
+	$(setup) \
+	($(swig_and_compile_cpp); ); \
+	$(run_testcase)
+
+%.ctest:
+	$(setup) \
+	($(swig_and_compile_c); ); \
+	$(run_testcase)
+
+%.multicpptest: 
+	$(setup) \
+	($(swig_and_compile_multi_cpp); ); \
+	$(run_testcase)
+
+# Runs the testcase. A testcase is only run if
+# a file is found which has _runme.scm appended after the testcase name.
+run_testcase = \
+	if [ -f $(srcdir)/$(SCRIPTPREFIX)$*$(SCRIPTSUFFIX) ]; then (	  \
+	  env LD_LIBRARY_PATH=$(DYNAMIC_LIB_PATH):$$LD_LIBRARY_PATH ./$* $(srcdir)/$(SCRIPTPREFIX)$*$(SCRIPTSUFFIX);) \
+	fi;
+
+# Clean
+%.clean:
+	
+clean:
+	$(MAKE) -f $(top_builddir)/$(EXAMPLES)/Makefile chicken_clean

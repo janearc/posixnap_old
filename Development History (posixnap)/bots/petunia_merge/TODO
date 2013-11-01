@@ -1,0 +1,162 @@
+AA:	Probably another lib::Regex::Common module (i.e., Neopets) would
+		be real useful here.
+
+		rating: not deemed useful, but if you want to implement it, thats cool.
+
+AA:	an automatic ban clearer.
+
+		rating: useful. anyone willing to do it should read POCO::IRC.
+
+AA:	the personality module. (dont ask)
+
+		rating: only alex can write this.
+
+AA: live cutover for databases using evildbh.
+
+		rating: requires project goals change. probably ignore this.
+
+AA: reloading utility on the fly. boot() and kick().
+
+		rating: requires project goals change. probably ignore this.
+
+AA: math module.
+
+		rating: useful. not criticial.
+
+AA: units module.
+
+		rating: useful. not criticial.
+
+AA: cc module (country code)
+
+		rating: useful. not criticial.
+
+AA: let's take cc, ipmap, and netcraft and just make an iptools.pm.
+
+AA: probably the "new" utility stuff should be merged into the test suite.
+		At present it is impossible to test changes to the petunia framework without
+		restarting the bot.
+
+		rating: critical
+
+AA: RE: PREVIOUS: THIS REALLY, REALLY, REALLY NEEDS TO BE DONE. SOMEBODY BE AN ANGEL AND DO IT.
+
+		rating: critical
+
+AA: pollute is not quite working.
+
+		rating: requires project goals change. probably ignore this.
+
+AA: if you pass a dsn thats broken (eg dbi:Pg:dbname=botdb_elvis;dbhost=goro-i.putar)
+		its fatal in dbi. we need to eval that call so we dont die. and, make sure to tell
+		the user all the $@ goodness.
+
+		rating: requires project goals change. probably ignore this.
+
+AS: date.pm gets triggered when pasting headers of RCS logs
+
+		rating: moderate. this should be fixed. it seems simple enough.
+
+AS: btw the bot still doesn't have its own consciousness
+
+		rating: useful. the 'personality' module should come close. however if
+		andreas wishes to be 'digitized' into the bot, he has another thing coming.
+
+AA: bug in select_map... bot pings out when big queries are issued.
+
+		rating: async.pm should fix this.
+
+AA: the bot needs to know it has to reconnect when it gets kicked.
+
+		rating: critical: this is an easy fix.
+
+AA: the bot has to know about alternative servers.
+
+		rating: critical: this is an easy fix.
+
+AA: the bot has to understand that Broker::Config can have arrays.
+		tell danris about this.
+
+		rating: moderate. danris won't listen. Broker::Config::Hash. or..
+		DBI::Easy::Hash and DBI::Easy::Array. Alex may fix this.
+
+AA: merge :metar with weather.pm. however, weather.pm needs a new parser.
+
+		rating: boring but easy.
+
+AA: I'm unfucking andreas' stuff. ive got market and karma appearing to be
+		doing their own database stuff, but i havent run them through -c etc.
+		lets hope the bot doesnt crash. :x
+
+		rating: only andreas or alex can fix this. either way it is difficult.
+
+AA: handle irc_ctcp_action. duh. reading docs++
+
+		rating: moderate: could be easy for the right programmer. read the pod for
+		poco::irc. that should explain.
+
+AA: karma is broken. --
+
+<xex> hummus++
+<xex> hummus++
+<xex> :karma hummus
+<petunia> hummus has 3 karma
+<xex> hummus++ hummus++ hummus++
+<xex> :karma hummus
+<petunia> hummus has 4 karma
+
+that should be fixed so it can process multiple entries.
+
+		rating: isnt this fixed?
+
+AA: quake.pm needs to change:
+
+<petunia> This Bulletin is updated every 5 minutes, if necessary.  The same Bulletin 
+<petunia> is also available via the Internet at:
+<petunia> http://neic.usgs.gov/neis/bulletin/bulletin.html and that is the
+<jimmy> wtf?
+<petunia> preferred means of obtaining it.
+<petunia> Updated as of Tue Mar 4 16:48:50 GMT 2003.
+
+		rating: isnt this fixed?
+
+AA: it would be good if the auto-op functions could display the oplist and accept
+		new op lists from the channel. i'm gonna put ben on this. (and delete them)
+
+		rating: easy
+
+AA: :sell does not go to notice, it does /msg. this is annoying in xchat.
+
+		rating: easy
+
+AA: petunia needs a "portability suite." here's the example scenario. i move from
+		one machine to another because im going offline. i want to be able to export
+		every row from every table to a file, and import them on the next machine. 
+		pg_dump has proved *woefully inadequate*. the first step would just be something
+		that propagated the "new data" to the "old database" without "stomping" on "old
+		data". alex could probably work on this some and commit it.
+
+		rating: hard
+
+AA: I really want the stuff that is prefixed with XXX: fixed. or just examined.
+
+		rating: easy per module but hard overall
+
+AA: the bot has to know when it isnt opped, and to ask politely to be opped when
+		it isnt opped.
+
+		rating: moderate
+
+AA: petunia needs a singing module. damnit.
+
+AA: merge doesnt seem to be working.
+
+AA: <Jerub> ~+hehstats
+<php-bot> total count of heh on #php: 536.  Top 3: HolyGoat -- 109 (20.3%), Stephanie -- 40 (7.5%), erps -- 38 (7.1%)
+
+AA: i like purl's approach to seen:
+
+<cwest> purl, seen coraline
+<purl> coraline was last seen on #perl 23 minutes and 21 seconds ago, saying: brevity: no, as in why it existed [Thu May 29 04:15:27 2003]
+
+if purl has seen them on the channel it is being asked on, it leaves the channel off.

@@ -1,0 +1,50 @@
+Original code design ("utilibot") late 2000, Alex Avriette.
+
+Reimplmentation to use Postgres and dynamic module loading by
+Alex Avriette. ("petunia")
+
+Extension of "petunia" framework to use Broker and much code 
+cleanup by Daniel Risacher. I could thank the Secretary of
+Defense, but I won't do that.
+
+Additional code adapted from Cormac Mannion's "perlSlut."
+
+Code from the "howitzer" bot written by Jason Zdan, and is 
+present in the weather module (and elsewhere, I'm sure). That
+code was also maintained by Tyler Hardison.
+
+The HTTPReq module contains a lot of code from the Neopets::
+hierarchy, which are the combined works of Matt Harrington
+and Alex Avriette.
+
+A few sessions via phone with Lincoln Stein <lstein@cshl.org>
+were enormously helpful with the original design of utilibot.
+
+Several nights have been spent discussing POE's more complex 
+workings with Rocco Caputo. The authors wish to thank him for his
+continued support and patience.
+
+Many thanks to the Postgres people.
+
+The friendly folks on the sunhelp lists (http://lists.sunhelp.org/)
+were responsible for the database server that makes petunia fly
+(SGI Challenge).
+
+While petunia (pelvis) has far transcended the infobot code 
+she was designed to mimic, credit is due to the infobot team 
+(http://www.infobot.org/). It would be real nice if Gecko would
+finally take off.
+
+Lastly, these efforts would have been for naught were it not for
+the extensive testing (and indeed abuse) of the bot for literally
+years now. These users can be found on irc.posixnap.net in #posix.
+Probably, also, the bot(s) can be found there, as well.
+
+Authors can be contacted at (in alpha order):
+
+Alex Avriette <avriettea@speakeasy.net>
+Tyler Hardison <tyler@posixnap.net>
+Cormac Mannion <cormac@posixnap.net>
+Daniel Risacher <magnus@alum.mit.edu>
+Andreas Seltenreich <s_selten@ira.uka.de>
+Jason Zdan <surefire@propaganda.yi.org>

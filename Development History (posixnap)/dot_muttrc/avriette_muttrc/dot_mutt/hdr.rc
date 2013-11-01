@@ -1,0 +1,6 @@
+# see http://www.mutt.org/doc/manual/manual-3.html
+# my_hdr X-Disclaimer: Why are you listening to me? # This is a comment
+
+my_hdr X-Operating-System: `uname -rpsv`
+my_hdr X-GPG-Key: 6DF10473, http://envy.posixnap.net/~alex/pubkey.asc
+my_hdr X-GPG: Encrypted communication preferred.

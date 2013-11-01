@@ -1,0 +1,7 @@
+to build:
+
+slod <slodfile> <destdir> <templatedir>
+
+eg:
+
+slod talk.slod talk/ templates/mytemplate

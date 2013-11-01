@@ -1,0 +1,35 @@
+    This impliments a simple search of a graph space,
+looking for the shortest path between two nodes.  The
+node connections contain weights, or in this case,
+penalties, showing that the fewest nodes traveled
+is not always the fastest path.
+    This algorighm focuses on the idea that when
+visiting a node, there is only ever one best path,
+meaning that if the algorithm visits a node twice,
+it will respond the same in the second visit.
+Therefore, any time a node is visited twice, it
+will be visited an infinite number of times in a
+loop.  This tries every path excluding all paths
+in which a node is visited more than once.  This
+limits the search space but still can be costly
+for large graphs.
+    One better algorithm would be an implimentation
+of a the Markov Decision Process.  This algorithm
+would create a policy of the best action for each
+node, or state, given some goal.  Then any movement
+from one node to another would already be listed
+in the policy, making each move simply cost a
+database lookup.  The learning process however
+can be costly, but this would learn the best
+path to the goal from any start state, not just
+one as the above method does.  This method could
+also be adapted to learn optimal paths given no
+prior knowledge of the graph, only of the results
+of its actions.  For large and/or unknown graphs,
+this would be a better algorithm.
+
+Files:
+
+bin/graph_search.pl
+        This program creates and a graph and searches
+    for the shortest path between nodes.

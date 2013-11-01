@@ -1,0 +1,17 @@
+my %freqs;
+
+sub public {
+    my ($channel, $nick, $msg) = @_;
+
+    while ($msg =~ s/\b([\w\']+)\b//) {
+	my $word = lc $1;
+	$freqs{$word}++;
+    }
+}    
+
+sub unload {
+    
+
+}
+
+1;

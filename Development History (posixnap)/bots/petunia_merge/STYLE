@@ -1,0 +1,113 @@
+		- Style guide for coding within the Pelvis framework -
+
+1. The General Perl Style Admonitions
+
+	In general, because of the highly flexible nature of perl's syntax, 
+users should feel free to stylize their code (often extensively). This is, 
+in the authors' opinions, A Good Thing. However, as a group of people 
+working on a piece of software, it is important to agree upon a set of 
+guidelines so that one developer can read another developer's code.
+
+	First off, there is perl documentation. See perlstyle(1) for details.
+Additionally, _The Perl Cookbook_ and _Learning Perl_ both offer small 
+guides on style.
+
+	Usually, the biggest sticking point among groups of perl programmers is
+the use (or lack of) whitespace. For example:
+
+	my @var=(split/\t/,$line);
+
+	# vs
+
+	my @var = split /\t/, $line;
+
+	Both are perfectly valid perl syntax and perform the same operation on
+the same variable. Some programmers, however, will get quite upset about
+"spurious" whitespace in places they don't see any need for it. What it
+boils down to, typically, is the resolution at which a given programmer's
+monitor is set to. Those of us using 9pt courier _need_ that whitespace,
+or we simply cant tell the slashes from the backslashes and the ticks from
+the backticks and doubleticks.
+
+	The same is true of parenthesis. Perl will often allow you to simply
+"leave off" parens where other languages would be having kittens. Again,
+it really is a matter of preference.
+
+	The most important rule to be following here is that you must maintain
+regimental consistency. If you always use a hundred parens around a 'split',
+everyone will know what you're doing when they see them. Changing up the
+punctuation from line to line makes it very hard for others to read what 
+is going on.
+
+	Additionally, if you feel the need to run your code through perltdy(1),
+that is construed, usually, as A Good Idea, and do not hesitate to do so
+if you are one of those types who likes perltdy's output.
+
+2. Point by Point
+	
+	The abovementioned style guidelines are important. However, some coding
+guidelines should also be mentioned:
+
+	o	strict and warnings. always. always. always. you *might* be able to 
+		get away with no strict "refs", but that is inadvisable. if you can't
+		be coding with strict and warnings, there is something seriously wrong
+		with your code.
+
+		god (with a little 'g') may forgive you for using 
+		
+			use strict qw{ vars subs };
+		
+		but generally it is considered bad form. There are places within the 
+		pelvis code where this has been used. Please be aware that when we
+		did that, we looked at all available options and decided something akin
+		to this: "If these programmers are looking at these particular guts,
+		they are intellectually capable of handling some soft, non-stricty 
+		references." Please do not complain about such refs unless you have
+		a more concise, better way to do it.
+
+
+	o compartmentalization and modularization. while it is not necessary to
+		turn all of your code into a module, it is important that you Do Not
+		Repeat Yourself (DRY). if you find yourself copying and pasting code,
+		that is an opportune time to stop, think about what you are doing, and
+		instead write a subroutine.
+
+	o	decoupling. your code is not your data, and your data is not your code.
+		if you have a large table that needs to be populated to look up key-value
+		pairs, don't go typing a 100-element hash in your code. it is ugly, and
+		it requires that you maintain your code and your data in the same file.
+		just use the database. that's what its there for.
+
+	o	documentation. it is ok, since this project is written and maintained by
+		developers, to not include extensive documentation. you don't even have to
+		write POD if you don't want to (and who does). however, when you start
+		a new block of code, drop a blank line, and a comment in there. like:
+
+			# here we are setting a counter on a widget based upon the widget's
+			# children
+			$widget -> {counter} = scalar @{ $widget -> {children} };
+
+		it will help you later when you revise, and it will help others when they
+		sit down to read your code.
+
+		please be advised however, if somebody else comes along and writes the
+		documentation for you, It Might Suck. If I write documentation for your
+		code so other developers can understand your api, and my documentation
+		sucks, it is your fault for not documenting in the first place.
+
+	o indentation. some of the authors prefer 4-space, space-expanded tabs.
+		personally, Alex feels this is icky, and prefers you use 2-space, non-
+		expanded tabs (in vi, it is :set tabstop=2). however, if you use a
+		consistent tabbing convention (remember, consistency is a major tenet of
+		perl style), nobody will fault you for it. much.
+	
+	o developers, developers, developers. 
+	
+		sorry, couldn't resist.
+
+	o broken code. if you have code that "works," is sufficiently "un-ugly,"
+		and there is a need to commit it to the tree (i.e., a user is squawking
+		about it), please commit it, even if stuff is broken. however, be very
+		clear about what is broken and how to fix it. prefix broken explanation
+		comments with XXX:. this way we can grep through the tree and find 
+		stuff thats broken easily.

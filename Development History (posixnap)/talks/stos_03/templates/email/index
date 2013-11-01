@@ -1,0 +1,7 @@
+<img src="images/happybaby.jpg" width="500" align="right"/>
+<p>
+  <strong>[% conf.title %]</strong>
+</p>
+<p>
+  by <em>[% conf.author %]</em>
+</p>

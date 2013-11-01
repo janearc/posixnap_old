@@ -1,0 +1,5 @@
+<opt>
+    <xml>1</xml>
+    <item name="foo" owner="me" price="123" />
+    <item name="bar" owner="you" price="321" />
+</opt>

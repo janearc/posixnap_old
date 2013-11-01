@@ -1,0 +1,3 @@
+Clone;
+ExtUtils::Autoinstall
+File::Slurp;

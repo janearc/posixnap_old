@@ -1,0 +1,25 @@
+# see top-level Makefile.in
+callback
+class
+constants
+contract
+enum
+exceptshadow
+extend
+funcattr
+funcptr
+funcptr2
+functor
+import
+template
+mpointer
+multimap
+operator
+pointer
+reference
+shadow
+simple
+smartptr
+template
+value
+variables

@@ -1,0 +1,34 @@
+    To find the worse case scenario in the stable marriage
+algorithm, one must look first for the things that make
+stable marriages simple.
+    Suppose there are two groups, G1 = { A, B, C } and
+G2 = { X, Y, Z }, with each memver of the groups having
+a preference for a member of the opposite group.  If G1
+proposes to G2 and every member of G1 has a different
+top preference, the first proposal will return a stable
+marriage.  For the proposal process to continue, someone
+must be rejected and this means that atleast two members
+of G1 must propose to the same member of G2.  If all n
+members of G1 propose to a single member of G2, then
+n-1 will be rejected.  If all rejected members again
+propose to the same person, it will be n-2 and so on
+until n-n when a stable marriage is reached.  This will
+guarentee n rounds of proposing.
+    Not all proposers may be rejected at any given
+round.  Once a member is accepted, that member stops
+proposing until it is rejected.  A member can only
+be rejected if it is replaced by another accepted
+member.  Thus, the number of accepted members can
+never go down, only up.
+    For the algorithm to take more than n rounds,
+each member cannot propose to the member they will
+end up with in a stable marriage.  The accepted
+proposals must not be to other members who find
+the proposal to be the optimal choice.  In other
+words, accepted proposals must be replacable if
+other members propose.  Given this situation, the
+number of accepted proposals may stay the same
+as members are replaced by other members.  This
+is the only way in which the number of rounds
+can excede n, where n is the number of members
+in the proposing group.

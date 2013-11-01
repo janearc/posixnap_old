@@ -1,0 +1,6 @@
+<ul>
+  [% FOREACH slide = slides %]
+    [% NEXT IF slide.1.present.match( '^Re:' ) %]
+    <li><a class="link" href="[% slide.0 %].html">[% slide.1 %]</a></li>
+  [% END %]
+</ul>

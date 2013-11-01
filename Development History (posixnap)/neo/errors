@@ -1,0 +1,10 @@
+[unka:~/cvs/neo/examples] narse% ./mystic.pl
+Use of uninitialized value in string at /Library/Perl/5.8.1/Neopets/Neopia/MysteryIsland/IslandMystic.pm line 105.
+
+
+[unka:~/cvs/neo/examples] narse% ./soup_kitchen.pl 
+Can't locate object method "username" via package "Neopets::Agent" at ./soup_kitchen.pl line 14.
+
+
+[unka:~/cvs/neo/examples] narse% perl neopoints.pl 
+Can't locate object method "username" via package "Neopets::Agent" at neopoints.pl line 10.

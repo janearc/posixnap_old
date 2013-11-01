@@ -1,0 +1,62 @@
+Snafooz Ideas:
+
+    Rotation:  This is something that puzzle pieces
+        will need to be able to do.. easy enough.
+        Same thing for flipping pieces over.  Again,
+        same thing with moving pieces around in the
+        2d plane.
+
+    Piece Interlocking:  Checking if edges interlock
+        will be hard.  The pieces need to be snug
+        enough so that there are no gaps, but checking
+        if the lines of each piece are the same is
+        not enough.  If the lines touch, then any point
+        on one edge will also be contained within the
+        other piece, which could also mean that it
+        does not fit.  Tracing a point along a line
+        also is bad because it requires some incriment
+        and illudes to the grid system and why it is
+        not used here.
+
+        Shapes that connect well should share common
+        vertices, and it should be in reverse order,
+        ie. clockwise vs counterclockwise.  Even if
+        vertices are not common, they should atleast
+        lie on a line of the connecting shape.
+        Perhaps this could be used to test for
+        connections.
+
+    Solving:  Pieces can be tested against eachother
+        (including rotating and flipping) in
+        lexicographic order.  A tree can be made of
+        pieces that fit.  Brute force should be able
+        to accomplish this with time...
+
+        To eliminate the number of guesses, each piece
+        can be initially tried with each other piece
+        and a table can be made of which pieces connect
+        to which other pieces.  This is then a simple
+        logic problem, maybe something that can be
+        solved with linear algebra.
+
+        To solve the 3-dimensional puzzles, the
+        program will need to think of the puzzle as
+        some other shape, such as a `T' or a cross.
+        Once a working configuration of pieces of
+        this layout are found, some pieces can be
+        rotated to simulate the way in which the
+        sides would align in 3-dimensions.
+
+        Another idea is to have pieces represented
+        in 3-dimensional space with a density.
+        With a good structure, this would be doable.
+
+Files:
+
+bin/test_fit.pl
+        This program tests the fit of two snafooz pieces.
+
+bin/solve_puzzle.pl
+        This program attempts to solve a snafooz puzzle.
+        Note: this does not currently function.
+

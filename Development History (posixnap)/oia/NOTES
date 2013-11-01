@@ -1,0 +1,17 @@
+data comes in and is tagged with its input component.
+
+after data arrives and is tagged, it is fed to the dispatcher, which then feeds each data object to all parse modules, some of which are async and some of which are sync.
+
+sync processes data inline, but in a random order (this prevents predicting when events wil be triggereed). output is then fed to the synchronous output processor.
+
+the dispatcher uses ipc/ikc to send data objects (xml?) to asynchronous children, which are launched at boot, or per request.
+
+asynchronous children then feed a response object to the async output listener.
+
+the sync output processor feeds the output modules for which data was tagged.
+
+o Async is easy. IPC/IKC is hard.
+
+o Probably we cannot pass native datatypes (eg $foo) so we need to use a middleman. xml cannot use unicode, but do we really need to use unicode? what about echo?[1]
+
+o Do we really need to be using POE? how about we Just Fork and use a socket? would that be so bad? if children have an id, they know which data is theirs. this also allows us to have an interface, eg. a listener socket (echo "shutdown" > /tmp/listen)

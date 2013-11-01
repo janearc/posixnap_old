@@ -1,0 +1,11 @@
+<template>
+	<accept name_contains=".pm$" />
+	<type interpreted="1" />
+	<interpreters>
+		<interpreter>perl</interpreter>
+		<interpreter>/usr/local/bin/perl</interpreter>
+		<interpreter>/usr/bin/perl</interpreter>
+	</interpreters>
+	<ipc type="socket">
+	<socket path="/tmp/XXX_INSERT_COOL_XSLT_STUFF_HERE" />
+</template>

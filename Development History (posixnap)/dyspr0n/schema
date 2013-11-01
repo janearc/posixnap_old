@@ -1,0 +1,11 @@
+pron=> \d link_descr_fetched 
+       Table "link_descr_fetched"
+ Column  |       Type        | Modifiers 
+---------+-------------------+-----------
+ link    | character varying | not null
+ descr   | character varying | 
+ fetched | boolean           | 
+ date    | date              | 
+ site    | character varying | 
+ bad     | boolean           | 
+Primary key: link_descr_fetchedx_pkey

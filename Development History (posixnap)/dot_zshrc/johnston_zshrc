@@ -1,0 +1,615 @@
+##########
+# .zshrc - Nate Johnston's zsh configuration
+# Minor revisions by Alex Avriette
+# http://thunder.semperbellum.org/
+# mailto:avriette@gmail.com
+# mailto:alex@thunder.semperbellum.org
+# mailto:alex@avriette.com
+##########
+
+# $Revision: 1.12 $
+# $Date: 2004-03-06 04:03:29 $
+
+# A few global definitions
+ZCACHE=$HOME/.zcache
+FAILSAFE=$HOME/.failsafe
+REVISION='$Revision: 1.12 $'
+
+# per nate 12 may 09
+# A few global definitions
+if ([[ -e $HOME/.zsh/.local-only ]]) {
+       ZCACHE=$HOME/.zsh/rc_cache
+       ZLOCAL=$HOME/.zsh/local
+       ZCOMPDUMP=$HOME/.zsh/compdump
+} else {
+       shorthost=${HOST%%.*}
+       ZCACHE=$HOME/.zsh/rc_cache.$shorthost
+       ZLOCAL=$HOME/.zsh/local.$shorthost
+       ZCOMPDUMP=$HOME/.zsh/compdump.$shorthost
+}
+
+# Functions
+function zsh_init {
+	BUILDCACHE=no
+	OS3=`echo $OSTYPE | cut -c 1-3`
+	umask 022
+	mkdir /tmp/$LOGNAME 2>/dev/null
+	rm -f $HOME/.bash_history
+	alias rez='source $HOME/.zshrc';
+	alias newcache='touch .zrebuild; source $HOME/.zshrc'
+	if ([[ -e $HOME/.zrebuild ]]) then
+		echo "zsh: rebuilding of the .zshrc cache has been specifically ordered, rebuilding now."
+		BUILDCACHE=yes
+		rm $HOME/.zrebuild
+	elif ([[ ! -e $ZCACHE ]]) then
+		echo "zsh: .zshrc cache is absent, creating it."
+		BUILDCACHE=yes
+	else
+		NEWREV=`grep REVISION .zshrc 2>&1 | head -1 | cut -f2 -d" "`
+		OLDREV=`grep REVISION $ZCACHE 2>&1 | head -1 | cut -f2 -d" "`
+		if ([[ -z "$OLDREV" ]]) then
+		  OLDREV="0.0"
+		fi
+		if ([[ "$OLDREV" -lt "$NEWREV" ]]) then
+			echo "zsh: .zshrc version $NEWREV differs from cached version $OLDREV.  Rebuilding .zshrc cache."
+			BUILDCACHE=yes
+		else
+#			echo "zsh: .zshrc version $NEWREV is same as cached version $OLDREV.  Keeping .zshrc cache."
+		fi
+	fi
+	if ([[ $BUILDCACHE = "no" && $OS3 != "osf" ]]) then
+		ZSHRC_TIME=`stat $HOME/.zshrc 2>/dev/null| grep mtime | cut -f2 -d"e"`
+		ZCACHE_TIME=`stat $ZCACHE 2>/dev/null| grep mtime | cut -f2 -d"e"`
+		if ([[ "$ZSHRC_TIME" > "$ZCACHE_TIME" ]]) then
+			echo "zsh: .zshrc is newer than the cache, rebuilding cache."
+			BUILDCACHE=yes
+		fi
+	fi
+	if ([[ ! -e $FAILSAFE ]]) then
+		if ([[ $BUILDCACHE = yes ]]) then
+			if ([[ $ZSH_VERSION[1] -ge 4 ]]) then
+				buildcache $ZCACHE
+				source $ZCACHE
+			else
+				echo "Can not build .zcache; your version of zsh ($ZSH_VERSION) is ancient."
+				PS1="%n@%m[%3~] %T %# "
+				# PS1="%n@%m:%~ ";
+				if ([[ $OS3 = "osf" ]]) then
+					touch $FAILSAFE
+					echo "
+					echo 'Null .zcache; zsh-$ZSH_VERSION is too old.'
+					PS1="%n@%m[%3~] %T %# "
+					# PS1='%n@%m:%~ '
+					TERM=vt220; export TERM
+					" > $ZCACHE
+				fi
+			fi
+		else
+			source $ZCACHE
+		fi
+	else
+		echo "FAILSAFE ACTIVATED"
+		PS1="%n@%m[%3~] %T %# "
+		# PS1='%n@%m:%~ '
+		TERM=vt220; export TERM
+	fi
+}
+
+
+# Per nate 12 May 09
+if ([[ ! -z "\$module_path" ]]) {
+       zmodload -i zsh/complist;
+       zmodload -i zsh/files;
+       zmodload -i zsh/mathfunc;
+       zmodload -i zsh/stat;
+       zmodload -i zsh/zftp;
+       zmodload -i zsh/zpty;
+       zmodload -i zsh/zutil;
+
+       # some initialization commands that go with those modules
+       functions promptinit > /dev/null
+       if ([[ \$? == 0 ]]) {
+               promptinit
+               compinit -d $ZCOMPDUMP
+               zfinit
+       }
+}
+
+# Add an item to the end of our path.
+function addpath {
+	addition=$argv[1]
+	if ([[ -d $addition ]]) then
+		if ([[ -n $path ]]) then
+			path=( $path $addition)
+		else
+			path=($addition)
+		fi
+	fi
+	unset addition;
+}
+
+# Add an item to the beginning of our path
+function prepath {
+	addition=$argv[1]
+	if ([[ -d $addition ]]) then
+		if ([[ -n $path ]]) then
+			path=( $addition $path )
+		else
+			path=($addition)
+		fi
+	fi
+	unset addition;
+}
+
+function addfunc {
+	addition=$argv[1]
+	if ([[ -d $addition ]]) then
+		if ([[ -n $fpath ]]) then
+			fpath=($fpath $addition)
+		else
+			fpath=($addition)
+		fi
+	fi
+	unset addition;
+}
+
+function addcd {
+	addition=$argv[1]
+	if ([[ -d $addition ]]) then
+		if ([[ -n $cdpath ]]) then
+			cdpath=($cdpath $addition)
+		else
+			cdpath=($addition)
+		fi
+	fi
+	unset addition;
+}
+
+function addmod {
+	addition=$argv[1]
+	if ([[ -d $addition ]]) then
+		if ([[ -n $module_path ]]) then
+			module_path=($module_path $module_path/zsh $addition)
+		else
+			module_path=($addition)
+		fi
+	fi
+	unset addition;
+}
+
+function addman {
+	addition=$argv[1]
+	if ([[ -d $addition ]]) then
+		if ([[ -n $manpath ]]) then
+			manpath=($manpath $addition)
+		else
+			manpath=($addition)
+		fi
+	fi
+	unset addition;
+}
+
+function addlib {
+	addition=$argv[1]
+	if ([[ -d $addition ]]) then
+		if ([[ -n $LD_LIBRARY_PATH ]]) then
+			LD_LIBRARY_PATH=$addition:$PATH
+		else
+			LD_LIBRARY_PATH=$PATH
+		fi
+	fi
+	unset addition;
+}
+
+function aliascheck {
+	TARGET=$argv[1]
+	CANDIDATE=$argv[2]
+ 	# use which to check where a binary lives
+	LOCATION=`which $CANDIDATE 2>/dev/null`
+	echo "# aliaschck: $LOCATION"
+	if ([[ -e $LOCATION ]]) then
+		echo "alias $TARGET='$LOCATION'"
+	fi
+	unset TARGET CANDIDATE LOCATION
+}
+
+function buildcache {
+    if ([[ $ARGC = 1 ]]) then
+		NEWCACHE=$argv[1]
+	else 
+		NEWCACHE=$HOME/.zcache
+	fi
+
+	path=('/usr/bin' '/bin')
+	rm -f $NEWCACHE
+
+	# Recreate the various paths
+	unset LD_LIBRARY_PATH
+	unset manpath
+	unset module_path
+	unset fpath
+	unset cdpath
+
+	addpath $HOME/scripts
+	addpath $HOME/bin
+	addpath $HOME/pkg/bin
+	addpath $HOME/pkg/sbin
+	addpath /usr/X11R6/bin
+	addpath /sbin
+	addpath /usr/sbin
+	addpath /usr/pkg/bin
+	addpath /opt/bcs/bin
+	addpath /usr/local/bin
+	addpath /usr/pkg/sbin
+	addpath /usr/local/sbin
+	addpath /usr/games
+	addpath /usr/www/bin
+
+	addpath /usr/local/tserver/bin
+
+	addman /usr/man
+	addman /usr/share/man
+	addman /usr/local/man
+	addman /usr/X11R6/man
+	addman /usr/pkg/man
+	addman $HOME/pkg/man
+	
+	addlib ${HOME}/lib/zsh/$ZSH_VERSION
+	addlib /opt/bcs/lib
+	addlib /usr/X11R6/lib
+	addlib /usr/local/lib
+	addlib /usr/lib
+	addlib /opt/lib/zsh/$ZSH_VERSION
+
+	addfunc $HOME/.zfuncs
+	addfunc /usr/local/share/zsh/$ZSH_VERSION/functions
+	addfunc /usr/pkg/share/zsh/$ZSH_VERSION/functions
+	addfunc /usr/share/zsh/$ZSH_VERSION/functions
+	addfunc /opt/bcs/packages/zsh-$ZSH_VERSION/share/zsh/$ZSH_VERSION/functions
+	addfunc /usr/bcs/packages/zsh-$ZSH_VERSION/share/zsh/$ZSH_VERSION/functions
+
+	addmod ${HOME}/lib/zsh/$ZSH_VERSION
+	addmod /usr/lib/zsh/$ZSH_VERSION
+	addmod /usr/local/lib/zsh/$ZSH_VERSION
+	addmod /usr/pkg/lib/zsh/$ZSH_VERSION
+	addmod /opt/bcs/packages/zsh-$ZSH_VERSION/lib/zsh/$ZSH_VERSION
+
+	ZSH_PATH=`which zsh`
+
+	# Generate the cache file
+cat << HEADER >> $NEWCACHE
+#!$ZSH_PATH
+#
+# ZSH configuration file
+# Auto-generated on `date '+%m/%d/%Y'`
+
+REVISION='$REVISION'
+path=( $path )
+fpath=( $fpath )
+cdpath=( $cdpath )
+manpath=( $manpath )
+module_path=( $module_path )
+LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+
+
+setopt allexport;
+setopt alwaystoend;
+setopt appendhistory;
+setopt no_autocd;
+setopt autolist;
+setopt automenu;
+setopt autonamedirs;
+setopt autoparamkeys;
+setopt autoparamslash;
+setopt autoremoveslash;
+setopt autoresume;
+setopt no_beep;
+setopt bsdecho;
+setopt no_cdablevars;
+setopt chaselinks;
+setopt completeinword;
+setopt correct;
+setopt correctall;
+setopt no_extendedglob;
+setopt no_glob;
+setopt no_globcomplete;
+setopt no_globdots;
+setopt no_globsubst;
+setopt hashcmds;
+setopt hashdirs;
+setopt hashlistall;
+setopt histverify;
+setopt no_hup;
+setopt interactivecomments;
+setopt listtypes;
+setopt login;
+setopt longlistjobs;
+setopt magicequalsubst;
+setopt markdirs;
+setopt menucomplete;
+setopt nullglob;
+setopt pathdirs;
+setopt printexitvalue;
+setopt pushdignoredups;
+setopt rcexpandparam;
+setopt recexact;
+setopt rmstarsilent;
+
+HEADER
+
+	foreach FDIR ($fpath)
+		cd $FDIR
+		foreach FFILE (*)
+			echo "autoload -U $FFILE" >> $NEWCACHE
+		end
+		cd $OLDPWD
+	end
+
+
+if ([[ $ZSH_VERSION[1] -ge 4 ]]) then
+cat << FOURONLY >> $NEWCACHE
+
+# Options that only work with version 4
+setopt no_autopushd;
+setopt cbases;
+setopt chasedots;
+setopt equals;
+setopt functionargzero;
+setopt glob;
+setopt histignorealldups;
+setopt histreduceblanks;
+setopt histsavenodups;
+setopt incappendhistory;
+setopt listrowsfirst;
+setopt multios;
+setopt sharehistory;
+setopt shortloops;
+
+# zmodload, only works with ver 4
+zmodload -i zsh/complist;
+zmodload -i zsh/files;
+zmodload -i zsh/mathfunc;
+zmodload -i zsh/stat;
+# zmodload -i zsh/zftp; # still don't know why some machines don't have this
+zmodload -i zsh/zpty;
+zmodload -i zsh/zutil;
+
+# This function only works in ver 4, because of the 'for',
+# ironically.
+function sigs {
+	for (( x=1; x <= \$#signals; x++ )) do
+		echo -n "\$x = \$signals[\$x]   	"; 
+		let "position = x % 4";
+		if ([[ \$position -eq 0 ]]) then
+			 echo "";
+		fi
+	done
+	echo "";
+}
+
+# end of version 4 specific section
+
+FOURONLY
+else
+	echo "You are using an ancient ($ZSH_VERSION) version of zsh! ";
+fi
+
+cat << BOILERPLATE >> $NEWCACHE
+`functions zsh_init`
+`functions addpath`
+`functions addman`
+`functions addlib`
+`functions addfunc`
+`functions addmod`
+`functions addcd`
+`functions aliascheck`
+
+function descr { 
+	if ([[ \$ARGC > 1 ]]) then
+		foreach DESCR_TMP (\$argv) {
+			DESCR=\$PWD/\$DESCR_TMP/DESCR;
+			if ([[ -e \$DESCR ]]) then
+				echo;
+				echo "Displaying: \$DESCR_TMP/DESCR";
+				cat \$DESCR;
+				read "TOSS?Press enter";
+			else
+				echo "descr: No such file or directory as \$DESCR.";
+			fi
+		}
+	else
+		if ([[ -d \$argv[1] ]]) then
+			DESCR_TMP=\$argv[1];
+		else
+			DESCR_TMP= ;
+		fi
+		DESCR=\$PWD/\$DESCR_TMP/DESCR;
+		if ([[ -e \$DESCR ]]) then
+			echo
+			echo "Displaying: $DESCR_TMP/DESCR";
+			cat \$DESCR;
+		else
+			echo "descr: No such file or directory as \$DESCR.";
+		fi
+	fi
+	unset DESCR_TMP;
+	unset DESCR;
+}
+
+function maildir {
+	MAIL_TMP=\$HOME/mail/\$argv[1];
+	mkdir \$MAIL_TMP;
+	mkdir \$MAIL_TMP/cur;
+	mkdir \$MAIL_TMP/new;
+	mkdir \$MAIL_TMP/tmp;
+	unset MAIL_TMP;
+}
+
+function xtitle {
+	echo -ne "\\033]0;\${argv}\\007";
+}
+
+# From the zsh faq
+# NOTE: There is a third \ on the sun-cmd line. This is specifically
+# because we are creating the .zcache, and the slashes were being
+# eval'd and one was going away. This is normally not correct syntax.
+function chpwd {
+	[[ -t 1 ]] || return
+	case $TERM in
+		sun-cmd) print -Pn "\e]l%~\e\\\"
+		;;
+		*xterm*|rxvt|(dt|k|E)term) print -Pn "\e]2;%~\a"
+		;;
+	esac
+}
+
+# Options in the zshparam(1) manpage
+cdpath=($cdpath);
+fignore=(.o .tmp);
+fpath=($fpath);
+HISTFILE="$HOME/.zhistory";
+HISTSIZE=100000;
+LISTMAX=100;
+MAILCHECK=60;
+mailpath=($HOME/mail /var/mail/$LOGNAME /var/spool/mail/$LOGNAME);
+manpath=($manpath);
+path=($path);
+PS1="%n@%m[%3~] %T %# "
+# PS1="%n@%m:%~ ";
+SAVEHIST=$HISTSIZE;
+TIMEFMT="time(%J): %U user %S kernel in %E seconds: %P%% cpu";
+TMPPREFIX="/tmp/$LOGNAME/zsh.";
+watch=all;
+
+# Zsh module-specific variables
+ZLS_COLORS="";						# zsh/complist
+
+# Program specific options
+BLOCKSIZE=K;						# ls
+EDITOR=vi;							# crontab
+CVS_RSH=ssh;						# cvs
+EXINIT='set autoindent';			# vi
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH;	# ld
+LESS=X;								# less
+PAGER=less;							# ?
+RSYNC_RSH=ssh;						# rsync
+TEMP_DIR=/tmp;
+TZ=EST;								# many things
+WWW_HOME="http://www.google.com"	# w3m/lynx
+XAUTHORITY="~./Xauthority";			# xwindows
+
+bindkey -e
+bindkey "^B" beginning-of-line
+
+pms=/usr/local/tserver
+tserver=/usr/local/tserver
+turboweb=/usr/local/tserver
+
+alias :q!=' ;bye';
+alias cp='nocorrect cp';
+alias cpan='sudo perl -MCPAN -e shell ';
+alias hogs='sudo du -skx * | sort -rn | head'
+alias la='ls -a ';
+alias ll='ls -l ';
+alias lk='ls -Al ';
+alias lpa='lpq -a ';
+alias lt='ls -alt ';
+alias make='nocorrect make';
+alias man='nocorrect man';
+alias mv='nocorrect mv';
+alias pl='vi $HOME/.zlogin';
+alias po='vi $HOME/.zlocal; source $HOME/.zlocal';
+alias pz='vi $HOME/.zshrc;source $HOME/.zshrc';
+alias rez='source $HOME/.zshrc';
+alias -g -- -Rf='-rf'
+alias s='ls -a ';
+alias ssr='ssh -l root ';
+alias ssrv='ssh -v -l root ';
+alias ssv='ssh -v ';
+
+`aliascheck vi vim`;
+
+BOILERPLATE
+
+case $OSTYPE in 
+	(sunos) # SunOS, which usually means solaris these days
+		echo "alias ping='ping -s '" >> $NEWCACHE
+		;;
+	(Linux|linux*) # Linux, distribution non-specific
+		echo "alias ls='ls -chF --color=always '" >> $NEWCACHE
+		echo "alias who='who -iw | sort'" >> $NEWCACHE
+		echo "alias pps='ps -eo \"%p %P %U >> %a\" | sort'" >> $NEWCACHE
+		;;
+	(freebsd) # FreeBSD 4.0 and 4.1
+		echo "alias ls='ls -FGc '" >> $NEWCACHE
+		echo "LSCOLORS=4x6x3x5x1x464301060203" >> $NEWCACHE
+		;;
+	(netbsd) # NetBSD 1.4.2
+		echo "alias ls='colorls -FGc '" >> $NEWCACHE
+		echo "LSCOLORS=5x6x3x4x1x464301060203" >> $NEWCACHE
+		echo "#pkg_path=(ftp://ftp.netbsd.org/pub/NetBSD/packages/1.5.2/i386/All ftp://ftp.netbsd.org/pub/NetBSD/packages/1.5.1/i386/All ftp://ftp.netbsd.org/pub/NetBSD/packages/1.5/i386/All)" >> $NEWCACHE
+		;;
+	(openbsd) # OpenBSD, untested
+		;;
+	(osf4*) # Digital Unix/OSF
+		echo "TERM=vt220" >> $NEWCACHE
+		echo "alias syslog='cd /var/adm/syslog.dated/current;'" >> $NEWCACHE
+		;;	
+esac
+
+cat << FOOTER >> $NEWCACHE
+
+if ([[ -e $HOME/.zlocal ]]) then
+	source $HOME/.zlocal
+fi
+
+if ([[ -e $HOME/.zlocal.$hostname ]]) then
+	source $HOME/.zlocal.$hostname
+fi
+
+if ([[ -e $HOME/.zaliases ]]) then
+	source $HOME/.zaliases
+fi
+
+if ([[ -e $HOME/.zenvironment ]]) then
+	source $HOME/.zenvironment
+fi
+
+if ([[ -e $HOME/.zhints ]]) then
+	source $HOME/.zhints
+fi
+
+if ([[ -e $HOME/.zfunctions ]]) then
+	source $HOME/.zfunctions
+fi
+
+# some initi commands that go with those modules
+promptinit
+compinit
+# zfinit # part of zftp
+
+agency=$HOME/.agent
+if ([[ -n "\$STY" ]]) then		               	# IF we are in a screen session
+    if ([[ -e \$agency/007 ]]) then             # AND IF agenting is enabled
+        if ([[ -f \$agency/\$STY ]]) then       # AND IF an agent is running
+			eval `cat .agent/1848.11-18-03 2>/dev/null | grep -v echo`
+		else									#  otherwise....
+	    	ssh-agent > \$agency/\$STY			#  Run a new agent and populate
+			eval `cat .agent/1848.11-18-03 2>/dev/null | grep -v echo`
+		fi
+    else
+		echo "ssh-agent storage disabled."
+    fi
+fi
+
+FOOTER
+
+if ([[ $ZSH_VERSION[1] -ge 4 ]]) then
+	zcompile $NEWCACHE
+fi
+
+}
+
+zsh_init;
+
+# aja // vim:tw=80:ts=2:noet:syntax=zsh

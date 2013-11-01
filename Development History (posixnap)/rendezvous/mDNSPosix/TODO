@@ -1,0 +1,2 @@
+aja: * Solaris does not have stdint.h. This is a C99-ism. Figure out whether we 
+aja:   can omit this on Solaris.

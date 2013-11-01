@@ -1,0 +1,124 @@
+=head1 STYLE GUIDE
+
+This is a rough document which will be updated as the codebase grows
+and the whims of the developers change. For now, please consider
+the following.
+
+=head1 FORMATTING
+
+Due to the names of variables, the multinested nature of POE 
+components (well, sessions), and other style concerns of advanced
+perl developing, it is necessary to attempt to preserve horizontal
+space in the editor window. This can be accomplished a number of 
+ways within the editor, such as vim(1) and emacs(1) use of "text
+folding." However, some times we are required to use simple vi(1)
+or other editors which are not so featureful.
+
+As such, it is requested that users program with a tabstop of two
+characters. Additionally, tabs are not to be 'expanded' into 
+spaces, as this makes future reformatting extremely difficult.
+
+In the vim(1) editor, we can simply issue these three commands:
+
+=over 2
+
+  :set noexpandtab
+  :set tabstop=2
+  :set autoindent
+
+=back
+
+You may find the following commands useful as well:
+
+=over 2
+
+  :set ruler
+  :set number
+
+=back 
+
+So that you can see how far to the right (e.g., how many columns)
+and how far towards the bottom (e.g., how many rows) your code is 
+going.
+
+Generally it is considered bad form to make lines which extend past
+80 characters, as they do not fit within small xterms. However. It
+is also understood that some statements need more "room." An example
+of this would be:
+
+=over 2
+
+  if ( $inputWidgetCount < $minWidgetCount ) { warnWidgetCount() }
+
+=back
+
+Keeping statements on one line can be considered a boon to the 
+developer for purposes of readability. However, the above line could
+be split into two lines while still retaining a facile reading level
+by simply doing:
+
+=over 2
+
+  warnWidgetCount()
+    if ( $inputWidgetCount < $minWidgetCount );
+
+=back
+
+Some users may find it appropriate, when a single statement is broken
+into two lines, to put a blank line above and below the statement so
+that it is immediately clear that it is a multiline statement. Of 
+course, this technique can be used with 'unless' as well. It is 
+especially useful with long 'die' messages:
+
+=over 2
+
+  die "Dear User, HLAGHLUAGHLAGHLAGHGHLLLAARHGHLAHUALG. Love, perl."
+    unless conditionMet();
+
+=back
+
+=head1 VARIABLE NAMES
+
+One of the core values of this project is the "self documenting code"
+paradigm. It is very important to name your variables in such a way
+that it is clear what the variable is doing, or what it contains, 
+simply by seeing its name. Examples of this would be, 
+C<$widgetInputText>, C<$userName>, and C<$connectionType>. A few bad
+examples of variable names are C<$i>, C<$iterator>, C<$state>. You
+may have noticed the capitalization in the variablenames. Since, as
+programmers, we frequently name variables short names (e.g., one word),
+it is easier to simply use all lowercase. However, when you have
+variables such as C<$widgetinputtext>, it becomes somewhat difficult 
+to casually read the name of the variable. It is necessary to stop
+"skimming" and read the name of the variable slowly. As such, we will
+still leave the first variable character lower case, and all successive
+words will begin with a capital letter. Again, several good examples of
+these variables are C<%thisUserInformation>, C<$channelUsersArrayRef>,
+C<$errorMessage>, and C<@availableChannels>. Underscores are not 
+appreciated, as one has to go fishing over to the delete key to find 
+it. Such expeditions are time consuming and yield no better results 
+than capitalized letters, and additionally, lengthen variables further.
+
+=head1 SUBROUTINE NAMES
+
+Subroutines should be named the same way as variable names. However,
+there is one further caveat. Subroutines will not be referred to, 
+anywhere, as C<&subName>. There are a few situations when it is 
+necessary to refer to a sub with a prefixed C<&>. However, in most 
+instances, syntax is misused for the sole purpose of "syntax coloring"
+in a particular developer's editor. It is possible to teach your 
+editor to change the color of subroutine names without the C<&> 
+sigil. Additionally, using C<subName()> is perfectly clear in itself.
+To paraphrase Larry Wall (creator of rn(1)), "if your editor can't do
+that, you need a better editor." This was in response to block comments
+in perl, but the message is equally applicable here.
+
+=head1 SESSION NAMES
+
+If you are creating a module with a POE Session, please take a moment
+to name it something reasonable. "Something Reasonable" in this case
+shall mean C<LegacyMyclassMysubclass> or C<OrchidMyclassMysubclass> for
+legacy components, and Orchid components, with subclasses, respectively. 
+If you don't have a subclass, please use 'Parent'. An example would be 
+C<OrchidMyclassParent>. Of course, please use the 'Variable Naming'
+convention to name session names.

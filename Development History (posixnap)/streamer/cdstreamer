@@ -1,0 +1,252 @@
+#!/usr/bin/perl
+
+# we've gotta be all pedantic and module happy here because we're playing
+# with sockets and pipes and stuff and the logfile wont autoflush even 
+# when $| is set to true. select() isnt behaving either. so we use IO::File,
+# which is very polite. see perldoc -q flush and perldoc IO::File (worthless)
+use warnings;
+use strict;
+use IO::Socket;
+use IO::File;
+use Data::Dumper;
+use Carp;
+
+use vars qw{ @list @list_l $listen_socket $connection %conf $log @albums @album };
+
+my $name = (split m[/], $0)[-1];
+(my $path = $0) =~ s!^(.*)/.*$!$1!;
+
+carp "\nname = $name\npath = $path\n";
+
+require 5.005; # rand() was b0rked before then.
+
+# ignore child processes to prevent zombies
+$SIG{CHLD} = 'IGNORE';
+
+# we are not log, we are Log.
+sub Log {
+	my $scalar = shift;
+	print $log scalar localtime(time())." ".
+		$ENV{HOSTNAME}." ".$name."[".$$."]: ".$scalar."\n";
+	1;
+}
+
+sub stage_left {
+	$listen_socket -> close();
+	$connection -> close();
+	if ($log -> close()) {
+		last;
+	} else {
+		Log "stage_left: failure to close logfile!! ($!)";
+		carp "stage_left: failure to close logfile!! ($!)";
+		exit 255; # so the shell knows we goofed
+	}
+	exit 0; # so the shell knows we were happy
+}
+
+sub stage {
+	# generally log files are considered a compile time option
+	# rather than a config option so I havent included any funtionality
+	# for a config-specified logfile. and since this server will be public
+	# it is absolutely necessary to make sure we log everything for purposes
+	# of security.
+	$log = new IO::File ">>/var/log/stream/$name.log"
+		or die $name."[".$$."]: cowardly refusing to continue\n".
+			"without log file (/var/log/stream/$name.log): $!\n\t$@\n";
+	$log -> autoflush();
+	%conf = %{ grok( "$path/$name.conf" ) };
+	$listen_socket = IO::Socket::INET  ->  
+	# 0wn the port
+	new	(	LocalPort => $conf{port},
+				Listen => 10,
+				Proto => 'tcp',
+				Reuse => 1
+			);
+	# die unless we 0wn the port
+	die "Can't create a listening socket: $@" unless $listen_socket;
+	open LIST, $conf{playlist}
+		or die "Can't open playlist ( $conf{playlist} ): $!\n\t$@";
+	@list = <LIST>;
+	chomp @list; # zap newlines
+	@albums = separate_cds( @list );
+	close LIST
+		or Log "stage: could not close ".$conf{playlist};
+	Log( "stage: listening on port ".$conf{port} );
+	1;
+}
+
+# grok rev. 4 improved regex clarity, reduced memory
+# and cpu usage.
+sub grok {
+	my $filename = shift;
+	my (%conf, $parm, $val);
+	if (open IN, $filename) {
+		foreach my $item (<IN>) {
+			chomp $item;
+			($parm, $val) = $item =~ /^(\S+) ([\S\s]+)$/;
+			$conf{$parm} = $val;
+		}
+		Log "grok: successfully read $filename";
+		close IN or Log "grok: couldnt close $filename";
+	} else { 
+		# couldnt open config file
+		Log "grok: $filename unreadable ($!), using defaults.";
+		$conf{port} = 8000;
+		$conf{server_name} = "My MP3 Server";
+		$conf{playlist} = "$path/$name.playlist";
+		$conf{israndom} = 'yep';
+		$conf{buffersize} = 1024;
+	}
+	\%conf; # ref'd for reasons of portability
+}
+														
+sub breed {
+	my $child = shift;
+	return undef if not defined $child;
+	if (!$child) {
+		# we're talking, not listening
+		$listen_socket -> close;
+		# start with a fresh list
+		Log( "breed: seeded new nonrandom list" ) if not $conf{israndom};
+		@album = undef;
+		stream( $connection );
+		# done playing
+		exit 0; 
+	} elsif ($child) {
+		Log( "connection recieved from " .
+			$connection -> peerhost() . "\n"
+		);
+		# its in the child's hands now...
+		$connection -> close();
+		1;
+	}
+}
+
+# pulls cd's out of a playlist.
+sub separate_cds {
+	my @tracks = (@_);
+	my %albums;
+	$=0;
+	foreach my $track (@tracks) {
+		#print "track: $track\n";
+		my $album = (split ' - ', $track, 3)[1];
+		next unless $album;
+		$albums{$album}++;
+	}
+	$=1;
+	Log "separate_cds: ". scalar (keys %albums) ." extracted from ".
+		scalar @list ." files";
+	return keys %albums;
+}
+
+# procedure. returns no values.
+# grabs a random album from the list and seeds the @album array with
+# tracks from it.
+sub seed_album {
+	my $this_album = $albums[ rand @albums ];
+	@album = grep { $_ =~ $this_album } @list;
+	Log "seed_album:  $this_album,  ". scalar @album ." tracks.";
+	if (!@album) { 
+		Log "seed_album: dying because $this_album is not in playlist!";
+	}
+	Log "seed_album: now playing from $this_album (". scalar @album .
+		" tracks)";
+}
+
+sub next_file {
+	# in the event we're doing this random we give them a
+	# random file, otherwise we shift one off the stack
+	# $conf{israndom} ? $list[ rand @list ] : shift @list_l;
+	if (@album) {
+		return shift @album;
+	}
+	else {
+		seed_album();
+		return shift @album;
+	}
+	Log "next_file: oops! bad logic!";
+}
+
+# sends a file, STREAM over $socket, 1k at a time.
+sub stream {
+	my $socket = shift;
+	
+	# loop forever (or until the client closes the socket)
+	for (;;) {
+		
+		# print the HTTP header.  The only thing really necessary
+		# is the first line and the trailing "\n\n".
+		# depending on your client (like xmms) you can also
+		# send song title etc.
+		print $socket 
+			"HTTP/1.0 200 OK\n".
+			"Content-Type: audio/x-mp3stream\n".
+			"Cache-Control: no-cache \n".
+			"Pragma: no-cache \n".
+			"Connection: close \n".
+			"x-audiocast-name: ".$conf{server_name}."\n\n";
+		
+		# this has the unfortunate consequence that shorter lists
+		# will terminate if a client stays online until they are
+		# shifted to the end of the array. this is not necessarily
+		# a serious problem since only 200 mp3's is 10 hours of content.
+		my $file = next_file;
+
+		# we need to do some checking to make sure we're getting a
+		# file from next_file because if we dont, we have a very tight
+		# loop filling up a logfile as fast as perl will let it.
+		#if ((! $file) && (! next_file)) {
+		#	Log( "stream: two nulls caught from playlist, exiting..." );
+			# we shouldnt have to worry about children, they have the same
+			# error checking we do. the parent will stay alive but that isnt
+			# so bad since it doesnt talk, it listens. we also may be exiting
+			# normally from a nonrandom playlist in which case dying is appropriate
+			# for one child but not all. just in case though we let the shell know
+			# something went wrong.
+		#	exit 255;
+		#}
+
+		# what file are we playing
+		Log "stream: playing file (". $connection -> peerhost() . ") $file\n";
+		
+		# open the song, or continue to try another one
+		 open STREAM, $file
+			or Log "error opening $file, skipping";
+
+		binmode STREAM ; # for windows users
+
+		my $read_status = 1;
+		my $print_status = 1;
+		my $chunk;
+
+		# here we read in a config-determined piece of the file
+		# and print it to the socket but only as long as we can
+		# read from the file and print to the socket.
+		# see perldoc -f read
+		while( $read_status && $print_status ) {   
+			$read_status = read (STREAM, $chunk, $conf{buffersize});
+			if( defined $chunk && defined $read_status) {   
+				$print_status = print $socket $chunk;
+			}
+			undef $chunk;
+		}
+		close STREAM;
+		
+		unless( defined $print_status ) {   
+			$socket -> close();
+			exit(0);
+		}
+	}
+}
+
+####
+### MAIN 
+##  this is where the brunt of the work gets done.
+#
+
+stage();
+
+# wait for connections at the accept call
+while ($connection = $listen_socket -> accept) {   
+	breed(fork()) or croak "Can't fork: $!";
+} 

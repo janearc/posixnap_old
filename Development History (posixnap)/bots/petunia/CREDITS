@@ -1,0 +1,25 @@
+Original code design ("utilibot") late 2000, Alex Avriette.
+
+Additional code adapted from Cormac Mannion's "perlSlut."
+
+Reimplmentation to use Postgres and dynamic module loading by
+Alex Avriette. ("petunia")
+
+Extension of "petunia" framework to use Broker and much code 
+cleanup by Daniel Risacher.
+
+A few sessions via phone with Lincoln Stein <lstein@cshl.org>
+were enormously helpful with the original design of utilibot.
+
+Many thanks to the Postgres people.
+
+Many thanks to drscholl for opennap.
+
+Many thanks to Colten Edwards (panasync) for help debugging and
+thoughts on the protocol and general problem solving.
+
+Authors can be contacted at:
+
+Daniel Risacher <magnus@alum.mit.edu>
+Cormac Mannion <cormac@posixnap.net>
+Alex Avriette <avriettea@speakeasy.net>

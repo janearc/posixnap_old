@@ -1,0 +1,10 @@
+# This file lists all of the possible results from the wheel of exitement
+# If the value of the prize won is sent as part as a POST, its pretty
+# clear what knowing the good results could mean
+<input type='hidden' name='prize_str' value='Mystery Prize - You only win <b>39</b> Neopoints... oh well, better luck next time!'>
+<input type='hidden' name='prize_str' value='Mystery Prize - You only win <b>64</b> Neopoints... oh well, better luck next time!'>
+<input type='hidden' name='prize_str' value='<b>Congratulations!!!</b> - You win a <b>Immense Rubber Axe of Doom</b>!'>
+<input type='hidden' name='prize_str' value='You win <b>1000</b> Neopoints!!!'>
+<img src='http://images.neopets.com/faerieland/win_skull.gif' width=150 height=150 border=1><p><b>THE SKULL!!! - thesecondfluffy starts to feel slightly feverish... maybe they have come down with a disease... :(</b></center> ... sorry, i goofed and didnt really read the above.
+<input type='hidden' name='prize_str' value='You win <b>500</b> Neopoints!!'>
+<input type='hidden' name='prize_str' value='The <b>Pant Devil</b> appears and steals your <b>Lu Codestone</b>'>

@@ -1,0 +1,30 @@
+#!/usr/bin/perl -w
+
+use constant SHOP_OWNER_NAME => 'narse43';
+
+BEGIN { $|++; $ENV{ACCOUNT} ? print "1..5\n" : ( print "1..0\n" and exit ); }
+END   { print "not ok 1 # modules did not load\n" unless $looks_good }
+
+use strict;
+use warnings;
+use vars qw/$looks_good/;
+$looks_good=1;
+print "ok 1\n";
+
+my ( $items, $shop, $item );
+
+my $i = 2;
+
+###
+test ( eval { require Neopets::Shops } ? 1 : 0, $i++ );
+test ( $shop = Neopets::Shops -> new(), $i++ );
+test ( $items = $shop -> listing( SHOP_OWNER_NAME ), $i++ );
+test ( $shop -> buy_direct( 'Palm Fan' ), $i++ );
+
+exit;
+
+sub test {
+  print $_[0] ? "" : "not ",
+        "ok $_[1]",
+        $_[2] ? " $_[2]" : "", "\n";
+}

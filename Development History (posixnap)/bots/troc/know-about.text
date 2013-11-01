@@ -1,0 +1,108 @@
+This project's name is to be determined (TBD).
+
+TBD is a test bench for a database that stores data similar to the way
+RDF defines relationships.  Knowing virtually nothing about RDF, I may
+have gotten the whole thing wrong.
+
+The bot's database consists of two tables.  The first table contains
+the unique phrases seen by the bot.  Each has its own integer which is
+used to identify it in the second table.
+
+The second table relates two strings via a third.  It does this by
+storing a "triplet" of string IDs.  Two IDs represent the subject and
+predicate of a relationship.  The other represents the relationship
+that exists between the first two.
+
+The most common sort of bot database is perhaps the one that comes
+with infobot.  It stores everything in the form "X is Y" or "X are Y"
+in the case of plurals.  The relationship between subjects and
+predicates are limited to the sorts that define what things are.
+
+  a moose (is) large
+  infobot (is) cool
+  geese (are) noisy
+  monkeys (are) funny
+
+TBD's triplet database allows us to define new relationships between
+things.
+
+  a moose (has) antlers
+  my cup (contains) tea
+  I (am) hungry
+  pigs (can't) fly
+
+The unique strings that comprise triplets are currently stored in a
+simple table.
+
+  unique ID (integer)
+  description (text, varchar, etc.)
+
+The triplets are stored in another simple table.  The unique ID refers
+to the triplet itself.  All the other IDs refer to unique strings in
+the previous table.
+
+  unique ID (integer)
+  subject ID (integer)
+  verb ID (integer)
+  predicate ID (integer)
+
+TBD's parser searches its input for the longest phrase, by number of
+words, that it recognizes as a type of verb.  It uses an internal
+function which tests the existence of a triplet ($phrase) (is a type
+of) (verb).
+
+Therefore, the database must have at least two nodes to begin with.
+
+  1: is a type of
+  2: verb
+
+And one relationship:
+
+  1: 1, 1, 2
+
+From there, we can add new verbs at will.  Infobot's is/are triplets
+are great fun, so we'll define them:
+
+  (is) (is a type of) (verb)
+  (are) (is a type of) (verb)
+
+Once the database understands what verbs are, new ones can be added
+easily.  Hex defined a set of special-purpose relations.  I think they
+were based on the FOAF RDF.
+
+  (hex) (dreams of) (seeing the Earth from space)
+  (hex) (has a species of) (Homo sapiens sapiens)
+  (hex) (has eye colour) (blue)
+  (hex) (has hair colour) (brows)
+  (hex) (is a member of) (London Perl Mongers)
+  (hex) (is a member of) (the human race)
+  (hex) (is on the web at) (http://downlode.org/)
+  (hex) (is the creator of) (wikibot)
+  (hex) (is the nickname of) (Earle Martin)
+  (hex) (lives in) (London)
+  (hex) (speaks) (English)
+  (hex) (was born in) (London, England)
+
+Nearly a hundred verb phrases have been defined over the first few
+days of the project's test period, thanks to several people on IRC,
+including:
+
+  agrees with, am, are, are a subclass of, are a type of, are at the
+  url, are on the web at, bin, bist, block, can, can attack, can have,
+  can't, cannot, chases, check, contains, could, could have been,
+  could not, couldn't, dance, dreams of, guess, has, hasn't, have,
+  have been entered, heard, is a member of, is a subclass of, is a
+  synonym of, is able to, is at the url, is coming out with, is
+  incompatible with, is larger than, is many of, is not, is of the
+  language, is produced by, is the art of, is the same as, ist, lives
+  in, recommend, represent, shall be, shall become, shimasen, shimasen
+  deshita, shimashita, shimatsu, sounds like, speaks, think, take,
+  triggers, want, was, was born in, were, will be, will become, works
+  for
+
+See the TODO file for where to go from here.
+
+See the README file for general notes and an invitation to participate
+in the project.
+
+-- Rocco Caputo - troc@pobox.com - http://poe.perl.org/

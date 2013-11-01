@@ -1,0 +1,26 @@
+# Aliases for zsh
+# Alex Avriette
+
+# $Revision: 1.3 $
+# $Date: 2004-02-23 18:56:05 $
+
+# Process stack
+alias pu='ps xawu | grep -i'
+alias pa='ps xawu'
+alias psme="ps xawu | grep $USER"
+
+# Job control
+alias j=jobs
+
+# Directory listing
+alias lt='ls -ltr | tail -f'
+alias ll='ls -lag | less'
+
+# Typos
+alias bim='vim'
+alias cim='vim'
+alias cmod='chmod'
+alias cown='chown'
+alias cd..='cd ..'
+alias cdd='cd' # my keyboard at work does this to me
+alias zsg='zsh'

@@ -1,0 +1,11 @@
+# OpenBSD.hints
+# fix some stupid things that openbsd does for my zsh init
+# $Id: OpenBSD.hints,v 1.1 2004-03-03 02:54:35 alex Exp $
+
+unalias ls
+
+addpath /usr/local/jdk1.2-blackdown/bin
+
+alias pflogview="sudo tcpdump -n -e -ttt -r /var/log/pflog"
+
+# aja // vim:tw=80:ts=2:noet:syntax=zsh

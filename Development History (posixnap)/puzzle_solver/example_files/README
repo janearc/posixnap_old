@@ -1,0 +1,14 @@
+    This directory contains several example files used
+by PuzzleSolver::IO::*.
+
+Files:
+
+    lines.txt:
+        This is a sample file containing line data.
+
+    points.txt:
+        This is a sample file containing point data.
+
+    file1.txt:
+        This is a sample file used by bin/test_shape_container.pl.
+    If contains both line and point data.

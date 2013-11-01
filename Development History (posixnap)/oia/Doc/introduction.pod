@@ -1,0 +1,52 @@
+=head1 Object Independant Architecture Introduction
+
+A short introduction to the project from a developer's perspective.
+
+=head1 OIA HIERARCHY
+
+You will find the root directory contains the perl module directories,
+the start_oia.pl file, and the Doc directory, in which this file should
+have been placed.
+
+=item
+
+	/Data
+=over 4
+
+	The /Data directory contains the objects for parsing and passing data.
+	For example, if we are using a particular kind of data, say, a URL, we
+	would then make a Data::URL.pm module.
+
+	The /Data directory also contains the Manipulate module, so that we can
+	freely convert between XML and perl objects such as:
+
+=over 2
+	use Data::Manipulate qw{ to_object to_xml };
+	our $object = to_object( $user_input );
+=back
+
+	In addition to the Manipulate module (and sub modules, which have not
+	yet been devised or committed), there is the Abstraction/ directory.
+	You can think of the Abstraction directory as a place to stuff
+	components into. Such as Data/Abstraction/CSV, Data/Abstraction/XML,
+	and so on. The abstraction modules can be considered as wherehouses
+	of methods for storing and retreiving data. It should be possible for
+	the developer to actually maintain data from XML stores or database
+	stores and use their datas interchangeably.
+
+	The last component of the Data directory is the Model module.
+	Data::Model essentially provides loose constraints for what objects must
+	contain. That is to say, it is the model for which other data objects are
+	to be based upon. We can then say that each new object, be it an XML or a
+	CSV object will contain a few constants. So far, these constants seem to
+	be things like "parent" (who owns me), "children" (who I own), and "serial"
+	(which might not be implemented, but is assumed to be the ID of the object
+	which we can then reference later in a global lookup table. maybe.)
+
+=head1 METHODS
+
+=head1 SUB CLASSES
+
+=head1 COPYRIGHT
+
+=head1 LICENSE

@@ -1,0 +1,9 @@
+# $Id: compinit,v 1.1 2004-03-06 03:04:22 alex Exp $
+# We stole this from zsh. For some reason, 4.2.0-pre-3 doesn't have it.
+
+compinit () {
+	# undefined
+	builtin autoload -XU
+}
+
+# aja // vim:tw=80:ts=2:noet:syntax=zsh

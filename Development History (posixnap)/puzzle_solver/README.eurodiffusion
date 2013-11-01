@@ -1,0 +1,72 @@
+                Eurodiffusion
+    
+    The purpose of this project is to simulate the movement
+of different Euro motifs through Europe.  We want to know
+how long it will take every city within a country to have
+a representative number of each available Euro motif.
+
+    This is accomplished through simulation.  The simulator
+simplifies the problem greatly.  First, all cities lie on
+a two dimensional grid and begin with the same ammount of
+their own motif (this can be adjusted).  Then, every day
+(tick), a percentage of their wealth in each motif is given
+to every city around them.
+
+    The simulation is structured into several objects, each
+representing an important part of the world.  The simplest
+object is a Motif which is mearly a name holder.  Coin objects
+each hold a Motif object to which they belong.  These two
+objects still exist, but for speed reasons are not used in
+the man simulation.
+
+    The next object is a City which will hold a portion of
+the worlds wealth.  Each city knows how many coins it holds,
+in either integer numbers or Coin objects, as well as which
+cities are adjacent to it.  These adjacent cities are important
+because this is where the wealth sharing will occur.
+
+    Every city object knows which Country object it belongs to.
+A country is mearly a label that all City objects in the World
+object belong to.
+
+    The World object is a container for all information given
+above.  It knows the location of every city, as well as all
+country names and motif names.  It is also responsible for
+the quick and simple creation of each of these objects.
+
+    The final object is the Agent which acts upon the World,
+simulation the diffusion of coins.  It does this by creating
+a copy of the world that it will alter.  It iterates through
+every city in both the world and the world copy.  For each city,
+it calculates the number of coins from each motif to move to
+the surrounding cities and makes those changes on the world
+copy.  When it is finished, it sets its old world to the new
+world and a day has gone by.
+
+    The World object itself has the ability to test when cities
+or countries are complete.  It can do this because it knows
+every city and country, as well as every motif.  The above
+iteration process continues until the world evaluates as complete.
+Throughout this process, every date of completeness gets stored
+to output later.
+
+    What is left is inputting and outputting the data.  This
+is accomplished with a secondary IO module which reads data
+in the accepted form.  It turns input into an array of World
+objects which it passes back to its caller.  In this case,
+the caller is another perl program which is itself responsible
+for iterating through the world, storing the complete times,
+sorting them by name and date, and outputting them.
+
+    Unlike the other programs in this suite, this will not
+display any auxilary descriptions or help dialogs.  It is
+understood that the user knows the accepted input and is
+able to read the output.
+
+Files:
+
+bin/test_diffusion.pl
+        This program reads world input and returns the time
+    it takes each country to become complete.  It will not
+    terminate on some incorrect world data, perhaps infinite
+    looping.  Please take care.

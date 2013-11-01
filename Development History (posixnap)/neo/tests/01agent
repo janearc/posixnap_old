@@ -1,0 +1,105 @@
+#!/usr/bin/perl -w
+
+BEGIN { $|++; print "1..28\n"; }
+END   { print "not ok 1 # modules did not load\n" unless $looks_good }
+
+use strict;
+use warnings;
+use File::Slurp;
+use vars qw/$looks_good/;
+$looks_good=1;
+print "ok 1\n";
+
+my ( $page1, $page2,
+     $agent, $file,
+     $events, $i,
+     $event );
+
+$i = 2;
+
+test ( eval { require Neopets::Agent } ? 1 : 0, $i++ );
+test ( eval { require Neopets::Event } ? 1 : 0, $i++ );
+
+test ( $agent = Neopets::Agent -> new(), $i++ );
+test ( $event = Neopets::Event -> new(), $i++ );
+
+###
+test ( $file = read_file( 'tests/files/something_has_happened.html' ), $i++ );
+
+###
+test ( $page1 = $agent -> get({ url => '1', content => 'foo' }), $i++ );
+
+###
+test ( $page2 = $agent -> get({ url => '1' }), $i++ );
+
+###
+test ( $page1 eq $page2, $i++, "# cached page test" );
+
+###
+test ( $page2 = $agent -> get({ url => '1', content => 'baz', no_cache => 1 }), $i++);
+
+###
+test ( $page1 ne $page2, $i++, "# no_cache test" );
+
+###
+test ( $page1 = $agent -> get({ url => '2', content => 'bar' }), $i++ );
+
+###
+test ( $page2 = $agent -> get({ url => '2' }), $i++ );
+
+###
+test ( $page2 eq 'bar', $i++, "# 2nd cache page test" );
+
+###
+test ( $Neopets::Event::EVENTS == 0, $i++, "# event stack" );
+
+###
+test ( $page1 = $agent -> get({ url => '1', content => $file }), $i++ );
+
+###
+test ( $Neopets::Event::EVENTS, $i++, "# 2nd event stack test" );
+
+###
+test ( $events = $event -> get(), $i++ );
+
+###
+test ( scalar @{ $events } == 1, $i++, "# 3rd event stack test" );
+
+###
+test ( ${ $events }[0] eq "A blumaroo bounces past and says 'Never ever give out your password!'", $i++, "# 4th event stack test" );
+
+###
+test ( $file = read_file( 'tests/files/random_event.html' ), $i++ );
+
+###
+test ( $page1 = $agent -> get({ url => '3', content => $file }), $i++ );
+
+###
+test ( $Neopets::Event::EVENTS == 2, $i++ );
+
+test ( $agent = Neopets::Agent -> new({no_events=>1}), $i++ );
+
+###
+test ( $page1 = $agent -> get({ url => '3', content => $file }), $i++ );
+
+###
+test ( $Neopets::Event::EVENTS == 2, $i++ );
+
+### optional
+$page1 = '';
+if ( $ENV{AGENT} ) {
+        # XXX: this test failed unexpectadly without the network, find out why
+    test ( eval { $page1 = $agent -> get({ url => 'http://www.neopets.com' }) }, $i++ );
+    test ( $page1 ? $page1 =~ /Neopets/ : 0, $i++ );
+} else {
+    test ( 1, $i++, "# skip" );
+    test ( 1, $i++, "# skip" );
+}
+
+exit;
+
+sub test {
+  print $_[0] ? "" : "not ",
+        "ok $_[1]",
+        $_[2] ? " $_[2]" : "", "\n";
+}

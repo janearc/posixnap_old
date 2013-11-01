@@ -1,0 +1,168 @@
+#!/usr/local/bin/perl
+use strict;
+
+# $Id: localfix,v 1.1 2004-03-14 01:21:16 alex Exp $
+
+# This script builds a link farm for /usr/local into all the package
+# directories listed in the file 'srcdirs'.  Directories of interest
+# are listed in the file destdirs.  If a line in srcdirs is commented
+# out with a '#' then links to that directory will be deleted.  Broken
+# links will also be cleaned up when the script is run.
+
+# If a real file (or directory) already exists where the link would
+# go, it is skipped, and the real file is left in place.
+
+# The point of the script is to allow the software package 'foo' to be
+# installed in /usr/local/foo. (I.e. /usr/local/foo/bin/foo,
+# /usr/local/foo/lib/libfoo.so, /usr/local/foo/include/foo.h) With
+# many packages this is easily done by using the
+# --prefix=/usr/local/foo flag at configure-time.  Then, this script
+# creates links to make is seem like it's installed in /usr/local.
+# Only /usr/local/bin needs to be in the users path, and most software
+# checks /usr/local/lib for shared libraries, etc.
+
+# To add a package, configure it with --prefix=/usr/local/foo, add
+# "foo" to the file 'srcdirs' and re-run this script.
+
+# To temporarily remove a package, just comment out it's entry in
+# 'srcdirs', and re-run this script.  
+
+# To permanently delete a package, just delete it's directory and
+# remove the line in 'srcdirs', and run the script.  
+
+my $root = '/usr/local';
+my $confdir = '/usr/local/conf/symlink';
+open (SRCDIRS, "$confdir/srcdirs");
+# get all source dirs, strip leading/trailing whitespace 
+my @srcdirs = map { s/(\s*$|^\s*)//g; $_; } <SRCDIRS>;
+# good source dirs aren't marked with a '#'
+my @good_srcdirs = grep {m/^[^\#]/} @srcdirs;
+# deprecated source dirs ARE marked with a '#', so strip it
+my @bad_srcdirs = map {s/^\#\s*//; $_} grep {m/^\#/} @srcdirs;
+open (L1DIRS, "$confdir/destdirs");
+my @destdirs = map {s/\s*$//;$_} grep {m/^[^\#]/} <L1DIRS>;
+close SRCDIRS; close L1DIRS; 
+
+# Find destination directories specified by wildcard
+
+my %tamed;
+# find wildcard specifications
+my @wilds = grep { m/\*/ } @destdirs;
+# remove wildcards from the list
+my @destdirs = grep {m/^[^\*]*$/} @destdirs;;
+
+for my $s (@good_srcdirs) {
+    print "scanning $s\n";
+    &iterate_with_dir( sub {
+	my ($f) = @_;
+	if (! -d $f) { return; }
+	for my $w (@wilds) {
+	    if ($f =~ $w ) {
+		$f =~ s:^$root/$s/::;
+		$tamed{$f} = 1;
+	    }
+	}
+    }, "$root/$s");
+}
+for my $t (keys %tamed) {
+    push @destdirs, $t;;
+}
+#    print (join ', ', @destdirs),"\n";
+#    exit;
+
+
+# Create destination directories that don't exist
+for my $d (@destdirs) {
+    if (-l "$root/$d") {
+	warn "$root/$d is already a symlink\n"; 
+#	unlink "$root/$d";
+    }
+    if (not -e "$root/$d") {
+	print "creating directory $root/$d\n";
+	mkdir ("$root/$d");
+    }
+}
+
+# Iterate through good sourcedirs, creating links.
+for my $s (@good_srcdirs) {
+    for my $d (@destdirs) {
+	if (-d "$root/$s/$d") { 
+	    opendir (DIR, "$root/$s/$d");
+	    my @files = grep { not m/^\.+$/ } readdir(DIR);
+	    closedir (DIR);
+	    for my $f (@files) { 
+		# If link already exists...
+		if (-l "$root/$d/$f") {
+		    # and points to the wrong place...
+		    if (readlink("$root/$d/$f") ne "$root/$s/$d/$f") {
+			# then remove it.
+			print "unlinking $root/$d/$f\n";
+			unlink ("$root/$d/$f") || warn "could not unlink: $!\n";
+		    }
+		}
+		# If there's no link (or file) in the destination directory...
+		if (not -e "$root/$d/$f") {
+		    # create the link.
+		    print "linking $root/$d/$f --> $root/$s/$d/$f\n";
+		    symlink ("$root/$s/$d/$f", "$root/$d/$f") || warn "could not link: $!\n";
+		}
+	    }
+	}
+    }
+}
+		   
+print "deprecated directories: ".(join ",",@bad_srcdirs)."\n";
+# Iterate through looking for deprecated or broken links.
+for my $d (@destdirs) {
+    opendir DIR, "$root/$d";
+    my @files = readdir DIR;
+    closedir DIR;
+    for my $f (@files) {
+	if (-l "$root/$d/$f") {
+	    my $target = "$root/$d/" . readlink "$root/$d/$f";
+	
+	    $target =~ s!^.*//!/!;  # remove extra root
+	    $target =~ s!/\./!/!g;   # remove /./
+	    $target =~ s!/[^/]+/\.\.!/!g;   # remove /foo/../
+#	    if ($target =~ m/^\s*$/) { next }
+	    my @badness = grep { $target =~ m!^$root/$_! } @bad_srcdirs;
+	    if (@badness > 0) {
+		print "unlinking deprecated $root/$d/$f (@badness, $target)\n";
+#		print "(unlinking disabled until it can be debugged.)\n"; 
+		unlink ("$root/$d/$f") || warn "could not unlink: $!\n";
+	    }
+	    if (not -e "$target") {
+		print "removing broken link $root/$d/$f to $target ($target)\n";
+#		print "(unlinking disabled until it can be debugged.)\n"; 
+		unlink ("$root/$d/$f") || warn "could not unlink: $!\n";
+	    }
+	}
+    }
+}
+
+system("/sbin/ldconfig");
+
+
+
+# this recurses over a directory, calling a coderef for each file.
+# (but not the directory itself!)
+sub iterate_with_dir {
+    my ($coderef, $dirname) = @_;
+
+    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+	$atime,$mtime,$ctime,$blksize,$blocks)
+	= stat($dirname);  
+
+    opendir TESTDIR, $dirname;
+    my @files = sort readdir(TESTDIR);
+    utime $atime, $mtime, $dirname;
+
+    foreach my $file (map {$dirname.'/'.$_} (@files)) {
+	if ($file =~ m|/\.$| or $file =~ m|/\.\.$|) {next;}
+	&{$coderef}($file);
+	
+	if (-d ($file) && (not -l ($file))) { 
+	    &iterate_with_dir($coderef, $file); 
+	}
+    }
+}

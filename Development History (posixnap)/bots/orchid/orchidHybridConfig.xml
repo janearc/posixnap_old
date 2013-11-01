@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<Orchid>
+	<config>
+		<server
+			hostname="irc2.posixnap.net"
+			port="6667" 
+			nick="carnivore" 
+			channels="#posix" 
+		/>
+		<modules>
+			<module>
+				<name>Orchid::Component::Joiner</name>
+				<autoload>1</autoload>
+				<location>file</location>
+				<new_args>
+					<channel>#posix</channel>
+				</new_args>
+			</module>
+		</modules>
+	</config>
+</Orchid>

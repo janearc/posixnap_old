@@ -1,0 +1,531 @@
+Design and plans for "know" version 2.
+
+--------
+Database
+--------
+
+Know's database is mainly about things grouped by threes into
+assertions.  One thing acts as the assertion's subject, another as its
+verb (formally known as a predicate, so we'll use that), and the last
+is an object.  RDF calls them triples.
+
+It's often convenient to visualize assertions as edges on a directed
+graph.  The subject and object are nodes, and the verb is some kind of
+arc.  Because "arc" is shorter to type and say than "assertion", and
+to avoid the obvious abbreviation of the latter term, we'll call them
+arcs down in implementationville.  Speaking of implementation, here's
+how assertions are stored as arcs.
+
+  ARC
+    sequence      (integer)
+    subject_seq   (integer, points to arc.sequence)
+    predicate_seq (integer, points to arc.sequence)
+    object_seq    (integer, points to arc.sequence)
+
+There are two types of assertion.  The one most people are accustomed
+to relates a subject and an object via some predicate.  Subject=pigs,
+Object=the-concept-of-flying, Verb=contains-the-ability-to.  Otherwise
+known as:
+
+  pigs can fly
+
+The lesser-known assertion simply states that a basic idea exists.
+These assertions are denoted by their subject, predicate, and object
+sequence numbers being zero.  They're called "anchor" arcs in the
+implementation, and we'll see why shortly.
+
+For example, this arc might represent the abstract pig:
+
+  (ARC)
+  SEQ   SUBJECT_SEQ     PREDICATE_SEQ   OBJECT_SEQ
+  12    0               0               0
+
+Likewise, the possibility of containing an ability:
+
+  (ARC)
+  SEQ   SUBJECT_SEQ     PREDICATE_SEQ   OBJECT_SEQ
+  42    0               0               0
+
+And finally, the concept of flying:
+
+  (ARC)
+  SEQ   SUBJECT_SEQ     PREDICATE_SEQ   OBJECT_SEQ
+  77    0               0               0
+
+So the assertion that "pigs can fly" would then be represented as:
+
+  (ARC)
+  SEQ   SUBJECT_SEQ     PREDICATE_SEQ   OBJECT_SEQ
+  12    0               0               0
+  42    0               0               0
+  77    0               0               0
+  99    12              42              77
+
+Notice that arcs are entirely numeric.  Computers have no problem with
+this, but puny humans with their weak reliance on symbols can't
+understand it without some help.
+
+The second table, "node", is that help.  It defines the human meanings
+of the anchor arcs.
+
+  NODE
+    sequence      (integer)
+    arc_seq       (integer, points to arc.sequence)
+    description   (large text)
+
+The Rosetta stone for "pigs can fly" looks like this:
+
+  (NODE)
+  SEQ   ARC_SEQ DESCRIPTION
+  13    12      pigs
+  57    42      can
+  103   77      fly
+
+-----------
+Reification
+-----------
+
+Reification is a big deal in RDF.  It allows us to discuss abstract
+concepts as if they were real things.  With the exception of certain
+muppets and Pink Floyd songs, and discounting trebuchets and other
+advanced technology, pigs obviously cannot fly.  They are the epitome
+of unflightworthiness.  In fact, the inability of pigs to become
+airborne is the crux of an English idiom used to describe a condition
+or feat that is borderlining on the impossible to achieve or perform.
+For example:
+
+  Rocco: I will finish know version 2.
+  Sungo: Yeah, when pigs fly!
+
+Since arc 99 describes pig flight, and since arcs are defined in terms
+of themselves, we can falsify it.  First we define two anchors: One to
+represent the ability to be in a state of being, and one to represent
+falseness.
+
+  (ARC)
+  SEQ   SUBJECT_SEQ     PREDICATE_SEQ   OBJECT_SEQ
+  1024  0               0               0
+  1235  0               0               0
+
+Which really doesn't mean anything until we define the nodes for them.
+
+  (NODE)
+  SEQ   ARC_SEQ DESCRIPTION
+  2001  1024    is in the state of being
+  2010  1235    untrue
+
+Finally, we can state an assertion about the ability of pigs to fly.
+
+  (ARC)
+  SEQ   SUBJECT_SEQ     PREDICATE_SEQ   OBJECT_SEQ
+  1240  99              1024            1235
+
+In other words:
+
+  "pigs can fly" is false
+
+---
+SQL
+---
+
+Query:
+
+  Subject   = wildcard
+  Predicate = can
+  Object    = fly
+
+Shorthand:
+
+  () (can) (fly)
+
+SQL:
+
+  SELECT
+    arc.sequence,
+    ent_s.description as subject,
+    ent_p.description as predicate,
+    ent_o.description as object,
+  FROM
+    arc, ent_s node, ent_p node, ent_o node
+  WHERE
+        predicate = "can"
+    and object    = "fly"
+    and arc.predicate_seq == ent_p.sequence
+    and arc.object_seq    == ent_o.sequence
+
+Query:
+
+  () (is) (false)
+
+  SELECT
+    arc.sequence,
+    ent_s.description as subject,
+    ent_p.description as predicate,
+    ent_o.description as object,
+  FROM
+    arc, ent_s node, ent_p node, ent_o node
+  WHERE
+        predicate = "is"
+    and object    = "false"
+    and arc.predicate_seq == ent_p.sequence
+    and arc.object_seq    == ent_o.sequence
+
+This gives us:
+
+  (4) (is) (false)
+
+Because record 4 does not contain all zeroes for subject, predicate,
+and object sequences, we know it refers to other things.  We can
+recursively fetch records from arc until we have only atoms left.  The
+atoms can be looked up in the nodes table to translate the
+resulting graph into human text.
+
+Be careful to track which arcs have been visited.  Otherwise circular
+reference loops will occur.
+
+Here is coraline's FOAF example (not shown) translated into a know-2
+data structure.  Reification (if that's what it is) is shown.
+
+  NODE
+     1  1 is a type of
+     2  2 predicate
+     3  4 has the value
+     4  6 person
+     5  7 is a kind of
+     6  9 Richard Soderberg
+     7 11 is a member of
+     8 13 email
+     9 15 ideas@crystalflame.net
+    10 18 name
+
+  ARC
+     1  0  0  0   # (is a type of, node=1)
+     2  0  0  0   # (predicate, node=2)
+     3  1  1  2   # (is a type of) (is a type of) (predicate)
+     4  0  0  0   # (has the value, node=3)
+     5  4  1  2   # (has the value) (is a type of) (predicate)
+     6  0  0  0   # (person, node=4)
+     7  0  0  0   # (is a kind of, node=5)
+     8  7  1  2   # (is a kind of) (is a type of) (predicate)
+     9  0  0  0   # (Richard Soderberg, node=6)
+    10  9  7  6   # (Richard Soderberg) (is a kind of) (person)
+    11  0  0  0   # (is a member of, node=7)
+    12 11  1  2   # (is a member of) (is a type of) (predicate)
+    13  0  0  0   # (email, node=8)
+    14 13 11  9   # (email) (is a member of) (Richard Soderberg)
+    15  0  0  0   # (ideas@crystalflame.net, node=10)
+    16 15  1 13   # (ideas@crystalflame.net) (is a type of) (email)
+    17 14  4 15   # ((email) (is a member of) (Richard Soderberg))
+                    (has the value)
+                    (ideas@crystalflame.net)
+    18  0  0  0   # (name, node=11)
+    19 18 11  9   # (name) (is a member of) (Richard Soderberg)
+    20 19  4  9   # ((name) (is a member of) (Richard Soderberg))
+                    (has the value)
+                    (Richard Soderberg)
+
+----------------------
+Storing Files as Nodes
+----------------------
+
+Nodes can be arbitrarily large.  Ideally, I'd like to store random
+things in this dabatase.  My photo collection.  My mp3 collection.
+All the research papers I download and never read.
+
+I see a few problems keeping media and things in the nodes table.
+First, the database software must be robust.  Second, most of my
+programs don't know how to read and write from a database.  They're
+accustomed to files.
+
+Ways to adapt the database to existing programs.
+
+Provide network services.  An HTTP interface could serve nodes to
+web browsers and music players that understand the protocol.  Many
+text editors can remotely edit content via FTP.
+
+Provide a simple REST interface and a small shell program that drives
+it.  Write shell wrappers around everything to fetch an node, run a
+program on it, and optionally store it back if any changes were made.
+
+Provide a dedicated browser to search the database and run programs on
+nodes.  This is one huge shell wrapper.
+
+Provide a web interface, and use a web browser as the huge shell
+wrapper.
+
+Coraline wants me to mention ETags, so we do.  TODO - Read more about
+that.
+
+-----------------------------
+Using Nodes to Refer to Files
+-----------------------------
+
+Files could also remain on a filesystem, where they are easily visible
+to everything.  Nodes would then refer to files rather than store
+their contents.
+
+Referring nodes would need to store extra information about the
+files.  A path name, perhaps an inode number, and one or more
+signatures to the file.
+
+  Node
+    sequence
+    arc_sequence
+    value (or path name)
+    sha1_hash
+    md5_hash
+
+The path name (stored in the value column) points to a file.  So do
+the sha1 and md5 hashes.
+
+The path is used to find files that have changed but not moved.  The
+signatures can be updated accordingly.
+
+Signatures can be used to find files that have moved (paths changed)
+but have not been modified.  Paths can be updated accordingly.
+
+The drawback here is that we've overloaded the value column.
+Sometimes it's short text, and other times it refers to a file
+somewhere.
+
+At which point to things become too big for direct storage?
+
+Do we store everything, no matter how small, as files?
+
+---------
+Use Cases
+---------
+
+We'll assume that various predicates are already understood by the
+system.
+
+"recipe.001 is a recipe for beer"
+
+  NODE
+    seq arcseq  value
+    1   1       recipe.001
+    2   2       is a recipe for
+    3   3       beer
+    4   5       was added on
+    5   6       20030511T202101Z
+
+  ARC
+    seq subseq  prdseq  objseq  (comment)
+    1   0       0       0       (recipe.001)
+    2   0       0       0       (is a recipe for)
+    3   0       0       0       (beer)
+    4   1       2       3       (recipe.001) (is a recipe for) (beer)
+    5   0       0       0       (was added on)
+    6   0       0       0       (20030511T202101Z)
+    7   1       5       6       (recipe.001) (was added on) (20030511T202101Z)
+
+In the above example, we have timestamped the recipe.  It may make
+more sense to timestamp the arc that relates to the recipe.
+
+  ARC
+    seq subseq  prdseq  objseq  (comment)
+    7   4       5       6       ((recipe.001) (is a recipe for) (beer))
+                                (was added on) (20030511T202101Z)
+
+---
+
+"Rocco needs to revise POE's documentation"
+
+  NODE
+    seq arcseq  value
+    1   1       Rocco
+    2   2       needs to
+    3   3       revise POE's documentation
+    4   5       (was added on)
+    5   6       (20030511T203157Z)
+
+  ARC
+    seq subseq  prdseq  objseq  (comment)
+    1   0       0       0       (Rocco)
+    2   0       0       0       (needs to)
+    3   0       0       0       (revise POE's documentation)
+    4   1       2       3       (Rocco) (needs to) (revise POE's documentation)
+    5   0       0       0       (was added on)
+    6   0       0       0       (20030511T203157Z)
+    7   4       5       6       ((R...) (needs to) (revise...))
+                                (was added on) (...)
+
+Now: "node(4) was completed on some other time"
+
+  NODE
+    seq arcseq  value
+    6   8       was completed on
+    7   9       some other time
+
+  ARC
+    seq subseq  prdseq  objseq  (comment)
+    8   0       0       0       (was completed on)
+    9   0       0       0       (some other time)
+    10  4       8       9       ((R...) (needs to) (revise...))
+                                (was completed on) (some other time)
+
+---
+
+"pigs can fly"
+
+  NODE
+    seq arcseq  value
+    1   1       pigs
+    2   2       can
+    3   3       fly
+
+  ARC
+    seq subseq  prdseq  objseq  (comment)
+    1   0       0       0       (pigs)
+    2   0       0       0       (can)
+    3   0       0       0       (fly)
+    4   1       2       3       (pigs) (can) (fly)
+
+"node(4) is false"
+
+  NODE
+    seq arcseq  value
+    4   5       is
+    5   6       false
+
+  ARC
+    seq subseq  prdseq  objseq  (comment)
+    5   0       0       0       (is)
+    6   0       0       0       (false)
+    7   4       5       6       ((pigs) (can) (fly)) (is) (false)
+
+"node(7) is true"
+
+  NODE
+    seq arcseq  value
+    6   8       true
+
+  ARC
+    seq subseq  prdseq  objseq  (comment)
+    8   0       0       0       (true)
+    9   7       5       8       (((pigs) (can) (fly)) (is) (false))
+                                (is) (true)
+
+--------------------
+Factoid Manipulation
+--------------------
+
+This only applies to grazing through chatter for new nodes and
+arcs.
+
+Ideally factoids should be stored in third-person.  This is difficult
+because people like to talk about themselves.  It's therefore
+necessary to perform first- to third-person translations on text.
+This is hard.
+
+Know's existing parser already breaks statements into subject,
+predicate and object.  It's possible to tag predicates by person
+(first, second, third) and provide a simple translation for third
+person.
+
+  <sky> I (get) married on Saturday.
+
+becomes
+
+  sky (gets) married on Saturday.
+
+A more complex example is needed here.
+
+----------------------------
+Stuff I Want to do With This
+----------------------------
+
+Well, organize everything.  Or at least make it all interconnected in
+ways that make them easily sliceable.
+
+Projects.  Index my source code.  Maybe hold revisions of things.
+Maybe be version control, even.
+
+Notes.  The system lets anything be annotated at random.  I can dump
+notes on anything I want.  Later, I can fetch a thing and ask the
+system for what notes are attached to that thing.  Likewise, I can
+skim my notes and say "hey, what's this attached to?"
+
+To-do lists.  Tasks and things are just specialized notes.
+
+Factoids, of course.  Skim everything: e-mail, web, news, irc, and
+build a knowledge base (or at least a factoid base) that's easily
+referrable later.
+
+Media.  Index, annotate, and perhaps server photos, music, movies, and
+texts.  Not limited to things I explicitly tell it to, but also--
+automatically-- to the things I find in my network travels.
+
+-------------
+Side Projects
+-------------
+
+We need recognizers for common data types.  Dates and times, telephone
+numbers, URLs, names and addresses.  This way we can add some
+structure to unstructured data, even if it's just to annotate things
+with their structured details.
+
+  "Meeting with Ms. Foobar two weeks from tomorrow."
+
+"two weeks from tomorrow" should be converted into a usable, sortable
+date.
+
+We need the ability to third-person everything.  See "Factoid
+Manipulation", above.
+
+Hey, the "See 'foo'" syntax would make a great cross-reference thing.
+
+qbot's query by English stuff.
+
+Starting to sound like "Chandler".
+
+----------
+Milestones
+----------
+
+Wherein we try to make this project feasable.
+
+Triplet storage.
+
+  Nothing happens without this.
+
+  Low-level API.
+  Mid-level API.
+  High-level APIs, for different sorts of applications.
+    Factoids
+    Media
+    Web services
+
+Factoid manipulation.
+
+  This is a hard problem, but one that can be worked on incrementally.
+  With properly expansive IRC (and other fora) logs, it may be
+  possible to tackle this alongside other things.
+
+Database browser.
+
+  Provide at least one non-CLI interface to the browser, possibly a
+  simple web interface for naivgating between nodes.  That Walrus
+  thing at CAIDA looks mightily fine.
+
+Recognizers.
+
+  Recognizing and making some sense out of information is imperative
+  to making this useful.
+
+Query by English.
+
+  The current know-bot syntax sucks.  Everybody hates it.  Good.  It's
+  for experimenting, not for real use.  Replace them suckers with
+  something humans eat.
+
+Ask the world.
+
+  Incorporate qbot's query-by-English of the web, and cache the
+  results as factoids whenever possible.
+
+Large content issues.
+
+  Decide how large content will be handled.
+  Reconcile large content (multimedia) with small content (notes).
+

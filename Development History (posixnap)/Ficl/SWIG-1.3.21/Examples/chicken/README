@@ -1,0 +1,25 @@
+This directory contains examples for CHICKEN.
+
+class       -- illustrates the shadow-class C++ interface
+constants   -- handling #define and %constant literals
+multimap    -- typemaps with multiple sub-types
+overload    -- C++ function overloading
+simple      -- the simple example from the user manual
+zlib        -- a wrapping of the zlib compression library
+
+Note that the examples in this directory build a special version of
+the CHICKEN interpreter (statically linked) which includes the wrapped
+functions in the top-level module.  Just run "make" in any example
+directory.
+
+** If you have a platform that supports dynamic linking (most UNIXes
+** and Win32), then you can run "make module" in any example
+** directory.  This will create a dynamic module called
+** module.dll/module.so/module.shl (depending on your platform), which
+** you can use with the following:
+
+   (load-library 'precsi "module.dll")
+
+or
+
+   (load-library 'example "module.dll")

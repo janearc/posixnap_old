@@ -1,0 +1,31 @@
+#!/usr/bin/perl -w
+
+BEGIN { $|++; $ENV{ACCOUNT} ? print "1..7\n" : ( print "1..0\n" and exit ); }
+END   { print "not ok 1 # modules did not load\n" unless $looks_good }
+
+use strict;
+use warnings;
+use vars qw/$looks_good/;
+$looks_good=1;
+print "ok 1\n";
+
+my ( $shop, $np, @items );
+
+my $i = 2;
+
+###
+test ( eval { require Neopets::Shops::Mine } ? 1 : 0, $i++ );
+test ( $shop = Neopets::Shops::Mine -> new(), $i++ );
+test ( $np = $shop -> get_till() || 1, $i++ );
+test ( $shop -> empty_till(), $i++ );
+test ( $shop -> clear_sales_history(), $i++ );
+push @items, 'Palm Fan';
+test ( $shop -> quickstock( \@items ) || 1, $i++ );
+
+exit;
+
+sub test {
+  print $_[0] ? "" : "not ",
+        "ok $_[1]",
+        $_[2] ? " $_[2]" : "", "\n";
+}

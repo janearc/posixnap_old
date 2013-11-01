@@ -1,0 +1,26 @@
+body {
+	background-color: white;
+	color: black;
+	font: 10px Verdana, Arial, sans-serif;
+}
+
+div.mainbox {
+	background-color: white;
+	color: black;
+	font: 10px Verdana, Arial, sans-serif;
+	width: 180px;
+}
+
+table {
+	font: 10px Verdana, Arial, sans-serif;
+}
+	
+a:link {
+	color: #6699CC;
+	text-decoration: none;
+}
+
+a:visited {
+	color: #6699CC;
+	text-decoration: none;
+}

@@ -1,0 +1,20 @@
+	a:visited {
+		text-decoration: none;
+	}
+	a:hover {
+		text-decoration: none;
+		color: #B80076;
+	}
+	a:active {
+		text-decoration: none;
+		color: #006E8E;
+	}
+	.download {
+		color: #005F70;
+		text-decoration: none;
+	}
+	.artist {
+		font-weight: bold;
+		text-decoration: none;
+		color: #4A0070;
+	}

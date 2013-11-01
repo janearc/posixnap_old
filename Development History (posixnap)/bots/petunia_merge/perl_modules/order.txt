@@ -1,0 +1,57 @@
+You probably want to compile postgres and perl exactly the same way
+so that the environment you use for all your modules is consistent.
+It is also therefore easier to write a shell script to set up your
+environment for you.
+
+Note that these are instructions for 5.8.0 and above. 5.6.x and
+below are probably missing some of the modules which are omitted
+herein from the core.
+
+install postgres
+install dbi
+set POSTGRES_INCLUDE and POSTGRES_LIB
+install dbd::pg
+install uri
+install html::tagset
+install html::parser
+install libwww-perl
+install html::tableextract
+install html::tree
+install tie::persistent
+install user::
+install mime::lite
+install test::inline schwern, HONK!
+install www::search
+install expat (expat.sourceforge.net)
+set EXPATINCPATH and EXPATLIBPATH
+install xml::parser
+install xml::xpath
+install tidy into $path (html-tidy from tidy.sourceforge.net. yeah, this sucks.)
+install scraper (it will complain because nobody updates it, install it
+anyways.. just 'make install')
+install io::pty
+install event:: (it might error on you)
+install curses:: (no tests, sorry)
+install term::readkey
+install poe::
+install poe::component::irc
+install file::slurp
+install io::string
+install www::babelfish
+install bit::vector
+install date::calc
+install date::leapyear
+install date::icalc
+install date::discordian
+install sys::load
+install bsd::resource
+install tie::ixhash
+install geo::metar
+install geo::weathernoaa
+install parse::recdescent
+install inline::
+install inline::asm
+install finance::quote
+install regexp::common
+install text::bastardize
+install bone::easy Schwern, honk!

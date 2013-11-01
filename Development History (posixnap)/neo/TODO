@@ -1,0 +1,47 @@
+DR: 	The PoogleSolitaire modules need significant cleansing.
+
+MH:	i am not sure Neopets::Shops::Item or Neopets::Shops::Mine::Item
+	have a use anymore.. is there a reason for keeping these?
+
+# XXX: tonight
+MH:	abstract training ( setup pet modules )
+-> MH:	the pet module is worky
+
+# XXX: tonight
+MH:	work on tombola module
+
+AA:     Neopets::MITraining . able to send pets to training. could be used
+		with the wizard to actually buy items and send pets to school to get
+                leveled up.
+-> this is done. aa.
+
+MH:     write better N::Config errors
+-> MH:  done to the best of my experience..
+
+MH:     create config setup where xml files are directly translatable into
+        arrays of $item objects
+-> MH:  this is done, see Neopets::Config and Neopets::Config::*
+	see Neopets::Config::example for api
+-> MH:  this config aspect is being fazed out of the project in favor
+        of more intelligent problem solving
+
+AA:	the setprice script (or, rather, the modules it calls) should die 
+		with an error if there is nothing in the shop. at present, it just
+		proceeds and there is no form to parse, so it warns loudly about uninit
+		vars.
+-> MH:	i believe this is done
+
+AA: regression tests are badly needed. we should start a t/ dir like the rest
+	of the cpan modules do, and use it for regression testing. i.e., t/train.t, t/neopoints.t ...
+
+AA: examples/wizard.pl should be hacked to understand a lack of np at this point.
+	i'm inclined to actually put the np checking into the buy() method. however, that
+	means that we grab one new page for every item we buy. since we're focusing on speed
+	with the wizard, and this program is running on slowish machines, it might not be
+	the greatest idea to do that. rather, to check the np once, and actively reduce the
+	value of $NP or whatever. the problem with this is that $NP can increase if, for example,
+	i empty the till while the wizard is doing (which i frequently do to avoid going broke).
+	the bloatpig is starting to crush its smaller minions.
+
+AA: i'd like a moneytree neopoints donation method. it would also be nice to have
+	an item class that understood a ->donate() method.

@@ -1,0 +1,170 @@
+=head1 conf
+
+title     Firewall Training, Seminar 1
+author    Alex J. Avriette
+email     alex@posixnap.net
+copyright Copyright (c) 2003 Alex J. Avriette
+css       style.css
+
+=head1 Disclaimer
+
+=head2 Disclaimer 
+
+Some techniques and methodologies discussed today can be used to
+weaken the security of networks you may have access to. Please don't
+do this.
+
+=head1 What we'll be doing today
+
+=head2 Myths
+
+=head2 What you're avoiding
+
+=head2 Who you're avoiding
+
+=head2 Before you firewall
+
+=head2 Planning
+
+=head1 What we won't be doing today
+
+=head2 Discussing COTS firewall products
+
+=head2 Discussing COTS NAT/Router products
+
+=head2 Discussing "which OS we prefer"
+
+=head2 Discussing the utility or validity of firewalling
+
+=head1 Myths
+
+=head2 Cracking is hard
+
+=head2 Only the badguys are cracking
+
+=head2 The goodguys are friendly
+
+=head2 Your employer is on your side
+
+=head1 Cracking is hard!
+
+=head2 Cracking is hard!
+
+=for html <img src="barbie_cracking_is_hard.jpg" align="right" />
+
+Briefly: any twelve year old can crack your machine. Many of you
+were one of these twelve year olds. Now, imagine how far you would
+have gotten if places such as <font face="courier">packetstorm</font>
+and <font face="courier">google</font> had been around then.
+
+These kids grew up with all the tools at their fingertips, and never
+
+=head2 The "boredom" factor
+
+The biggest problem you'll face either as an administrator or as a
+user is actually making it too boring to crack your password.
+
+=head1 Only the badguys are cracking
+
+=head2 Only the badguys are cracking
+
+Examples of this are
+
+<ul>
+	<li> Not using the same root password as your login
+	<li> Not using the same password for your email as your login
+	<li> Using SSL and 128-bit WEP
+	<li> Using properly configured switches instead of hubs
+	<li> A firewall
+	<li> Odd port numbers (e.g., port 2222 for ssh)
+	<li> Not storing your login information in plaintext anywhere (databases!)
+	<li> MAC-based access instead of open-access
+</ul>
+
+=head1 Your employer is on your side
+
+=head2 Your employer is on your side
+
+Many more techniques exist, but consider applying three of the above
+to your personal situation. ALL of the above were directly derived
+from experience.  Yes, he had his root password in his database.
+
+The attention span of a cracker is something on the order of half
+an hour, provided you haven't got anything real juicy for them.
+They will simply move on to somebody who didn't attend this talk.
+
+=head1 
+
+This is perhaps one of the biggest problems with security in the
+small and medium business as well as the home and home office.
+
+The badguys probably AREN'T INTERESTED IN YOU!
+
+The people who are out to get you are not out to do it to see you
+in ruins. They are out to do it because they want your bandwidth
+for porn or mp3's or cracker prestige or any number of reasons that
+have nothing to do with you. You are a target of opportunity.
+
+The people you want to watch out for is the guy across the street
+with a big yagi.  The guy in your office who is having a bad day.
+Your KIDS!
+
+=head1 
+
+Ok, so perhaps this doesn't apply to you. But how sure are you that
+you aren't being wrongfully investigated for child pornography?
+This is a repeated occurrence in the media today. C<metric> of these
+people are never convicted.
+
+=head1 
+
+What if your employer is logging all of your AIM traffic? What if
+your employer is monitoring your email? How can you be sure that
+what you are saying RIGHT NOW will not be taken out of context?
+
+=head1 What you're avoiding
+
+=head2 What you're avoiding
+
+  [fruit:~] alex% sudo tcpdump -s 4096 -vvv -xX -i en1 | grep -A6 -B6 -E '(USER|PASS)'
+
+An example:
+
+  08:57:48.606485 (tos 0x0, ttl 255, length: 64) merlin.local.50327 > 239.255.255.253.svrloc: [udp sum ok] udp 36
+  0x0000   0100 5e7f fffd 0030 6505 972d 0800 4500        ..^....0e..-..E.
+  0x0010   0040 54bc 0000 ff11 273d a9fe a5b7 efff        .@T.....'=......
+  0x0020   fffd c497 01ab 002c 884a 0201 0000 2420        .......,.J....$.
+  0x0030   0000 0000 2a26 0002 656e 0000 0003 6e66        ....*&..en....nf
+  0x0040   7300 0744 4546 4155 4c54 0000 0000             s..DEFAULT....
+
+This is the kind of thing we're going to see. You'll notice that
+anyone in here, on this network, with a machine running Unix (although
+windows utilities exist) could be sniffing your passwords -- telnet,
+ftp, imap, pop. Indeed, anyone in this room, who sees the above
+line, is probably trying it now.
+
+=for continue continue
+
+Now would be a good time to close your email clients.
+
+=head1 Who you're avoiding
+
+=head2 Casual eavesdroppers
+
+=head2 Identity thieves (for fun OR profit)
+
+=head2 Malicious attackers
+
+=head2 Established do-gooders doing "good"
+
+=head1 Before you firewall
+
+=head1 Determine what you need
+
+=head2 NAT
+
+=head2 Subnets
+
+=head2 IDS
+
+=head2 Proxies

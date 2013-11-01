@@ -1,0 +1,45 @@
+#!/usr/bin/perl -w
+
+BEGIN { $|++; print "1..13\n"; }
+END   { print "not ok 1" unless $looks_good }
+
+use strict;
+use warnings;
+use vars qw/$looks_good/;
+$looks_good=1;
+print "ok 1\n";
+
+my $i = 2;
+
+# required modules
+test ( eval { require Exporter } ? 1 : 0, $i++ );
+test ( eval { require File::Slurp } ? 1 : 0, $i++ );
+test ( eval { require HTTP::Cookies } ? 1 : 0, $i++ );
+test ( eval { require LWP::UserAgent } ? 1 : 0, $i++ );
+test ( eval { require Term::ANSIColor } ? 1 : 0, $i++ );
+test ( eval { require URI::Escape } ? 1 : 0, $i++ );
+
+# optional modules
+if ( $ENV{EXTRA} ) {
+  test ( eval { require Getopt::Long } ? 1 : 0, $i++ );
+  test ( eval { require Statistics::Descriptive } ? 1 : 0, $i++ );
+  test ( eval { require Term::ReadKey } ? 1 : 0, $i++ );
+  test ( eval { require XML::Simple } ? 1 : 0, $i++ );
+} else {
+  test ( 1, $i++, "# skip" );
+  test ( 1, $i++, "# skip" );
+  test ( 1, $i++, "# skip" );
+  test ( 1, $i++, "# skip" );
+}
+
+# all neopets modules
+test ( eval { require Neopets } ? 1 : 0, $i++ );
+test ( eval { my $nep = Neopets -> new({all=>1}) } ? 1 : 0, $i++ );
+
+exit;
+
+sub test {
+  print $_[0] ? "" : "not ",
+        "ok $_[1]",
+        $_[2] ? " $_[2]" : "", "\n";
+}

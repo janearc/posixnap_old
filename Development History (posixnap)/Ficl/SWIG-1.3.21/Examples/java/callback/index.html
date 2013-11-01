@@ -1,0 +1,29 @@
+<html>
+<head>
+<title>SWIG:Examples:java:callback</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+
+<tt>SWIG/Examples/python/extend/</tt>
+<hr>
+
+<H2>Implementing C++ callbacks in Java</H2>
+
+<tt>$Header: /home/jabba/convert/cvs/Ficl/SWIG-1.3.21/Examples/java/callback/index.html,v 1.1 2004-02-01 03:54:53 alex Exp $</tt><br>
+
+<p>
+This example illustrates how to use directors to implement C++ callbacks in Java.
+</p>
+<p>
+Please note that unlike Python, Java does not have an equivalent concept of
+weak references, so the program has to manually clean up after objects. The
+implication of this is that the <code>Caller</code> class cannot claim
+ownership of the <code>Callback</code> object in <code>Caller.setCallback()</code>
+and delete it.
+</p>
+
+<hr>
+</body>
+</html>

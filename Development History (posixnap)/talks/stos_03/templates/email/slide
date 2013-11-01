@@ -1,0 +1,82 @@
+[%
+   MACRO format_text BLOCK;
+     CALL slod.parser.default_view( 'Pod::POM::View::HTML' );
+       text;
+	 CALL slod.parser.default_view( 'Pod::POM::View::Pod' );
+   END;
+%]
+
+[% MACRO present_slide BLOCK %]
+  [% FOREACH node = start.content %]
+	[% IF node.type == 'text' %]
+	  <p class="text">
+	    [% format_text( text = node ) %]
+	  </p>
+
+
+	[% ELSIF node.type == 'head2' %]
+	  <p class="head2">[% node.title %]</p>
+	  [% present_slide( start = node ) %]
+
+
+	[% ELSIF node.type == 'verbatim' %]
+	  <table class="verbatim-table" width="100%">
+	    <tr>
+	      <td class="verbatim">
+            |[% node | html | replace( ' ', '&nbsp;' ) | replace( "\t", '&nbsp;&nbsp;&nbsp;&nbsp;' ) | replace( "\n\n", "" ) | replace( "\n", "<br />|" ) %]
+	      </td>
+	    </tr>
+	  </table>
+
+    [% ELSIF node.type == 'over' %]
+      <dl>
+        [% present_slide( start = node ) %]
+      </dl>
+ 
+
+    [% ELSIF node.type == 'item' %]
+      <dt class="list-head"><em>[% format_text( text = node.title ) %]</em></t>
+      <dd>
+        [% present_slide( start = node ) %]
+      </dd>
+ 
+    [% ELSIF node.type == 'for' AND node.format == 'html' %]
+      [% node.text %]
+
+    [% ELSIF node.type == 'begin' AND node.format == 'html' %]
+      [% node.text %]
+
+	[% ELSIF node.type == 'begin' AND node.format == 'text2html' %]
+	  [% USE TextToHtml %]
+	  [% node.text FILTER text2html(paras=1, tables=1, bullets=1, numbers=1, bold=1) %]
+
+    [% ELSIF node.type == 'begin' AND node.format == 'example' %]
+	  [% USE PerlTidy %]
+	  [% text = node.text.0 ? node.text.join('') : node.text %]
+      [% text | $PerlTidy l=72 'ce' | $PerlTidy 'html' 'nnn' 'pre' %]
+
+    [% ELSE %]
+      <p class="error">Unhandled type ``[% node.type %]''!</p>
+	[% END %]
+  [% END %]
+[% END %]
+
+<table class="email-headers">
+  <tr class="email-header">
+    <td><strong>X-Folder:</strong></td><td><strong>[% conf.title %]</strong></td>
+  </tr>
+  <tr class="email-header">
+    <td>Date:</td><td>Fri, 06 Jun 2003 08:30:00 -1000</td>
+  </tr>
+  <tr class="email-header">
+    <td>From:</td><td>[% conf.author %] &lt;[% conf.email %]&gt;</td>
+  </tr>
+  <tr class="email-header">
+    <td>To:</td><td>Perl Whirl &lt;perlwhirl@geekcruises.com&gt;</td>
+  </tr>
+  <tr class="email-header">
+    <td><strong>Subject:</strong></td><td><strong>[% title %]</strong></td>
+  </tr>
+</table>
+
+[% present_slide( start = slide ) %]

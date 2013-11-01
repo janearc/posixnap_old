@@ -1,0 +1,30 @@
+# Environment variables for zsh
+# Alex Avriette
+
+# $Revision: 1.1 $
+# $Date: 2004-02-14 21:05:40 $
+
+# CVS
+CVSROOT="alex@minotaur.posixnap.net:/cvs"
+CVS_RSH=`which ssh`
+
+export CVSROOT CVS_RSH
+
+# Epic
+# echo "alex avriette" | perl -MList::Util=shuffle -e \ 
+#  '@z = shuffle split //, <>; print join q//, @z; print qq/\n/'
+IRCNICK=tp
+IRCNAME='xaetvr tealei'
+
+export IRCNICK IRCNAME
+
+# Squid
+PROXY='http://10.1.1.1:3128'
+
+export PROXY
+
+# Neopets
+# http://minotaur.posixnap.net/cgi-bin/cvsweb.cgi/neo/
+NP_HOME=${HOME}/.neopets
+
+export NP_HOME

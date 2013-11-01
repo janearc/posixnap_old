@@ -1,0 +1,84 @@
+#!/usr/bin/perl -w
+
+BEGIN { $|++; print "1..43\n"; }
+END   { print "not ok 1 # modules did not load\n" unless $looks_good }
+
+use strict;
+use warnings;
+use vars qw/$looks_good/;
+$looks_good=1;
+print "ok 1\n";
+
+my ( $pets, $pet1, $pet2 );
+
+my $i = 2;
+
+###
+test ( eval { require Neopets::Pet::Simple } ? 1 : 0, $i++ );
+test ( $pet1 = Neopets::Pet::Simple -> new(), $i++ );
+
+test ( $pet1 -> age(1), $i++ );
+test ( $pet1 -> defence(2), $i++ );
+test ( $pet1 -> gender(3), $i++ );
+test ( $pet1 -> height(4), $i++ );
+test ( $pet1 -> hp(5), $i++ );
+test ( $pet1 -> intelligence(6), $i++ );
+test ( $pet1 -> level(7), $i++ );
+test ( $pet1 -> movement(8), $i++ );
+test ( $pet1 -> name(9), $i++ );
+test ( $pet1 -> owner(10), $i++ );
+test ( $pet1 -> species(11), $i++ );
+test ( $pet1 -> strength(12), $i++ );
+test ( $pet1 -> weight(13), $i++ );
+
+test ( $pet1 -> age() == 1, $i++ );
+test ( $pet1 -> defence() == 2, $i++ );
+test ( $pet1 -> gender() == 3, $i++ );
+test ( $pet1 -> height() == 4, $i++ );
+test ( $pet1 -> hp() == 5, $i++ );
+test ( $pet1 -> intelligence() == 6, $i++ );
+test ( $pet1 -> level() == 7, $i++ );
+test ( $pet1 -> movement() == 8, $i++ );
+test ( $pet1 -> name() == 9, $i++ );
+test ( $pet1 -> owner() == 10, $i++ );
+test ( $pet1 -> species() == 11, $i++ );
+test ( $pet1 -> strength() == 12, $i++ );
+test ( $pet1 -> weight() == 13, $i++ );
+
+test ( $pet2 = Neopets::Pet::Simple -> new(
+    { age => 1,
+      defence => 2,
+      gender => 3,
+      height => 4,
+      hp => 5,
+      intelligence => 6,
+      level => 7,
+      movement => 8,
+      name => 9,
+      owner => 10,
+      species => 11,
+      strength => 12,
+      weight => 13,
+    } ), $i++ );
+
+test ( $pet2 -> age(1), $i++ );
+test ( $pet2 -> defence(2), $i++ );
+test ( $pet2 -> gender(3), $i++ );
+test ( $pet2 -> height(4), $i++ );
+test ( $pet2 -> hp(5), $i++ );
+test ( $pet2 -> intelligence(6), $i++ );
+test ( $pet2 -> level(7), $i++ );
+test ( $pet2 -> movement(8), $i++ );
+test ( $pet2 -> name(9), $i++ );
+test ( $pet2 -> owner(10), $i++ );
+test ( $pet2 -> species(11), $i++ );
+test ( $pet2 -> strength(12), $i++ );
+test ( $pet2 -> weight(13), $i++ );
+
+exit;
+
+sub test {
+  print $_[0] ? "" : "not ",
+        "ok $_[1]",
+        $_[2] ? " $_[2]" : "", "\n";
+}

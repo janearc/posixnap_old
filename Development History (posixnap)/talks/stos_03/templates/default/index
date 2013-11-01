@@ -1,0 +1,4 @@
+<blockquote>
+  <h2>[% conf.title %]</h2>
+  by [% conf.author %]
+</blockquote>

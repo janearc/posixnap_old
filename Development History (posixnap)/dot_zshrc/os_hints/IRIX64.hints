@@ -1,0 +1,36 @@
+# IRIX64.hints
+# helpful hints for zsh initialization on IRIX64.
+#
+# NOTE: yes, some of these paths are stupid. That's what makes
+# IRIX so cute.
+#
+# $Id: IRIX64.hints,v 1.1 2004-03-03 02:54:34 alex Exp $
+
+# sgifreeware
+addpath /usr/freeware/bin
+addpath /usr/freeware/sbin
+
+addman /usr/freeware/man
+
+addpath /usr/bsd
+addpath /usr/sysadm/bin
+addpath /usr/sysadmin/privbin
+addpath /usr/etc
+addpath /usr/X11
+addpath /etc
+
+# Obviously, if you don't have a license for MIPSPro, you'll have to
+# change this.
+export CC=/usr/bin/cc
+export CFLAGS="-64"
+export LD="/usr/bin/cc $CFLAGS"
+
+unalias ps
+unalias pa
+unalias pu
+unalias psme
+alias pa="ps -ef"
+alias pu="ps -ef | grep -i "
+alias psme="ps -ef | grep $USER "
+
+# aja // vim:tw=80:ts=2:noet:syntax=zsh

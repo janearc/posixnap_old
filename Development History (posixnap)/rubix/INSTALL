@@ -1,0 +1,18 @@
+Installation Instructions:
+    This software uses the standard perl makefile
+system.  To create the makefile, type:
+
+        perl Makefile.PL
+
+Then:
+
+        make && make test
+
+If the tests were successful, continue with the
+installation.  Note, you may need to be root
+to complete this step:
+
+        make install
+
+Congratulations!  You successfully completed the
+installation process.

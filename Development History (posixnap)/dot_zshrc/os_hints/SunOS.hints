@@ -1,0 +1,30 @@
+# SunOS.hints
+# helpful hints for zsh initialization on SunOS.
+#
+# $Id: SunOS.hints,v 1.1 2004-03-03 02:54:35 alex Exp $
+
+prepath /usr/ucb/bin
+prepath /usr/ccs/bin
+
+addpath /usr/xpg4/bin
+addpath /usr/sadm/bin
+addpath /usr/openwin/bin
+
+# some machines have /opt/sfw, others have /usr/sfw
+addpath /opt/sfw/bin
+addpath /opt/sfw/sbin
+addpath /usr/sfw/bin
+addpath /usr/sfw/sbin
+
+addman /opt/sfw/man
+addman /usr/sfw/man
+
+# if you are using sun's vim and sun's gnome...
+if [ -e /opt/sfw/bin/vim ]; then
+	if [ -e /bin/gnome-terminal ]; then
+		unalias vim
+		alias vim="vim -T builtin_beos-ansi -u ~/.vimrc "
+	fi
+fi
+
+# aja // vim:tw=80:ts=2:noet:syntax=zsh

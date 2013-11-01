@@ -1,0 +1,24 @@
+            Rubil's Cube Solver
+        by Matt Harrington
+
+    To use this project, follow the instructions in INSTALL.
+
+Files:
+
+bin/puzzle.pl:
+        This file runs the rubik's solver.  It will ask for
+    input on the initial cube to solve then attempt to solve
+    it.  It is is solvable, it will display instructions on
+    how to solve it.  If not it will give you a smartass
+    answer.
+
+cubes/example_cube.txt:
+        This is a sample cube file.  For those lazy people
+    who do not want to type, you can do this:
+    
+            bin/puzzle.pl < cubes/example_cube.txt
+
+    This will run the solver on the cube found in the file.
+    Running the puzzle.pl program once will give you an idea
+    of what a cube file would look like...
+

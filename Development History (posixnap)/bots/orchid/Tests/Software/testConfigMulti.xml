@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<Orchid>
+	<config>
+		<server
+			hostname="irc2.posixnap.net"
+			port="6667" 
+			nick="baker" 
+			channels="#bohr" 
+		/>
+		<modules>
+			<module name="Bot::Pluggable::Joiner" autoload="1" location="file" />
+		</modules>
+	</config>
+	<config>
+		<server
+			hostname="irc2.posixnap.net"
+			port="6667" 
+			nick="abel" 
+			channels="#bohr" 
+		/>
+		<modules>
+			<module name="Bot::Pluggable::Joiner" autoload="1" location="file" />
+		</modules>
+	</config>
+	<config>
+		<server
+			hostname="irc2.posixnap.net"
+			port="6667" 
+			nick="trinity" 
+			channels="#bohr" 
+		/>
+		<modules>
+			<module name="Bot::Pluggable::Joiner" autoload="1" location="file" />
+		</modules>
+	</config>
+</Orchid>

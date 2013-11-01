@@ -1,0 +1,71 @@
+
+install postgres
+install dbi
+set POSTGRES_INCLUDE and POSTGRES_LIB
+install dbd::pg
+install uri
+install html::tagset
+install html::parser
+install libwww-perl
+install html::tableextract
+install html::tree
+install tie::persistent
+install user::
+install mime::lite
+install test::inline 
+install www::search
+install expat (expat.sourceforge.net)
+set EXPATINCPATH and EXPATLIBPATH
+install xml::parser
+install xml::xpath
+install xml::simple
+install tidy into $path (html-tidy from tidy.sourceforge.net. yeah, this sucks.)
+install scraper (it will complain because nobody updates it, install it anyways.. just 'make install')
+install io::pty
+install event:: (it might error on you)
+install curses:: (no tests, sorry)
+install term::readkey
+install poe::
+install poe::component::irc
+install poe::component::irc::object
+install file::slurp
+install number::compare
+install text::glob
+install file::slurp::tree
+install io::string
+install www::babelfish
+install bit::vector
+install date::calc
+install date::leapyear
+install date::ical (sometimes this doesnt show up in the cpan search.. wtf)
+install date::discordian
+install sys::load
+install bsd::resource
+install tie::ixhash
+install geo::metar
+install geo::weathernoaa
+install parse::recdescent
+install finance::quote
+install regexp::common
+install text::bastardize
+install bone::easy
+install bot::pluggable
+install bot::pluggable::joiner
+install class::factory::util
+install archive::tar
+install extutils::parsexs
+install yaml::
+install module::build
+install params::validate
+install io::scalar (io::stringy)
+install pod::escapes
+install pod::simple
+install test::builder::tester
+install test::pod
+install datetime::locale
+install class::singleton
+install datetime::timezone
+install datetime::
+install datetime::strptime
+install time::piece (lots of warnings)
+install poe::component::client::http

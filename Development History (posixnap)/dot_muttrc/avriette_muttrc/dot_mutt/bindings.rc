@@ -1,0 +1,5 @@
+bind index "\Cb" previous-page
+bind index "\Cd" next-page
+bind index "\CD" delete-thread
+# bind index "G" bottom
+# bind index "<" top

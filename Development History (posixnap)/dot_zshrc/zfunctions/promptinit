@@ -1,0 +1,28 @@
+# $Id: promptinit,v 1.1 2004-03-06 03:04:22 alex Exp $ 
+# We stole this from zsh. For some reason, 4.2.0-pre-3 doesn't have it.
+promptinit () {
+		emulate -L zsh
+		setopt extendedglob
+		local ppath='' name theme
+		for theme in $^fpath/prompt_*_setup(N)
+		do
+				if [[ $theme = */prompt_(#b)(*)_setup ]]
+				then
+						name="$match[1]" 
+						if [[ -r "$theme" ]]
+						then
+								prompt_themes=($prompt_themes $name) 
+								autoload -U prompt_${name}_setup
+						else
+								print "Cannot read file $theme containing theme $name."
+						fi
+				else
+						print "Eh?  Mismatch between glob patterns in promptinit."
+				fi
+		done
+		autoload -U colors
+		colors
+		prompt_newline=$'\n%{\r%}' 
+}
+
+# aja // vim:tw=80:ts=2:noet:syntax=zsh

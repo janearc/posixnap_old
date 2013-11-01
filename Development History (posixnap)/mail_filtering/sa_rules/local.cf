@@ -1,0 +1,310 @@
+# Spam Assassin Local Rules
+# Alex Avriette
+# 
+# On my machine, this lives in /etc/mail/spamassassin/local.cf. This may be
+# different on your machine.
+# 
+# Hopefully somebody will find this useful.
+# $Id: local.cf,v 1.33 2004-03-18 15:22:12 alex Exp $
+
+required_hits 4.1
+
+# people who send me spammy stuff
+whitelist_from mac*@webtv.net
+whitelist_from *@baesystems.com
+whitelist_from *.paypal.com
+whitelist_from *@cheaperthandirt.com
+whitelist_from *@vonage.com
+whitelist_from *@paladiantech.com
+whitelist_from *@zipcar.com
+whitelist_from *.apple.com
+whitelist_from *.monster.com
+whitelist_from *@mjtcs.com
+whitelist_from *@*LoneWolfDist.com
+whitelist_from *@*progressive.com
+whitelist_from *@*habeas.com
+
+# people who should be garotted
+blacklist_from *omniscient.com
+blacklist_from *j-connect.com
+blacklist_from eazytyme@judge.com
+blacklist_from *@spray.se
+blacklist_from *skillstorm* # admin this, buddy
+blacklist_from *@*eglobesolutions.com # sunmanagers spammers
+
+# hi, legba. you don't change your clock, i blacklist you.
+blacklist_from samuraidiscokat@hotmail.com
+
+# amika
+header AMIKA_SPAM X-AmikaGuardian-Action =~ /Junk Mail/
+score AMIKA_SPAM 2.4
+header AMIKA_BUSINESS X-AmikaGuardian-Action =~ /Business/
+score AMIKA_BUSINESS -2
+
+# porn stuff
+body GIRONES /gir1s/i
+score GIRONES 4
+body REF_SEMEN /\s*(s[3e]m[3e]n|cum|j[1i]zz?)\s*/i
+score REF_SEMEN 0.5
+body MILFHUNTER /milfhunter/i
+score MILFHUNTER 3.0
+body MILFS /m[1i][l|]fs?/i
+score MILFS 1.0
+body GIRL_NEXT_DOOR /g[1i]r[1l][s5]?\s+n[3e]xt\s*d[0o]{2}r/i
+score GIRL_NEXT_DOOR 3.0
+header BIKINI_HED ALL =~ /bikini/i
+score BIKINI_HED 0.6
+body BIKINI_BOD /bikini/i
+score BIKINI_BOD 0.6
+header BOUND ALL =~ /bound/i
+score BOUND 0.2
+body MODELS /models/i
+score MODELS 0.5
+body YEARS_OLD /[0-9]+y(?:[3e][4a]r[sz5]?)?\.?o(?:[l1i]d)?\.?/
+score YEARS_OLD 1.5
+body FACIAL /facial/i
+score FACIAL 1.2
+body LESBIAN_MENTIONED /lesbian/i
+score LESBIAN_MENTIONED 0.4
+header INCH_SUBJ_SPAM_HIGH Subject =~ /\bRude Rape\b/i
+describe INCH_SUBJ_SPAM_HIGH INCH CUSTOM RULE -- subject contains spam phrase
+body ERECTION_MENTIONED /(erection|hard[0o]n|stiffy|chubby)/i
+score ERECTION_MENTIONED 1.0
+body CULO_MENTIONED /(butth[0o@]l[3e]|[a@]nu[5s]|[a@]n+[au]l)/i
+score CULO_MENTIONED 0.2
+body STUFFED_MENTIONED /stuffed/i
+score STUFFED_MENTIONED 0.2
+body HOLES_MENTIONED /holes?/i
+score HOLES_MENTIONED 0.1
+body ASV_WANKERS /asv.html?/i
+score ASV_WANKERS 3.0
+body DICKS /d[1i]ck[sz5]?/
+score DICKS 1.1
+body SPICE_B /spice/i
+score SPICE_B 0.2
+header SPICE_H ALL =~ /spice/i
+score SPICE_H 0.8
+header AVG_H ALL =~ /avg/i 
+score AVG_H 1.0
+body AVG_B /avg/i
+score AVG_B 0.5
+body INCH_NUMERIC /(\S+\s+inch|\d+\s*")/i
+score INCH_NUMERIC 0.3
+body BUNNY /bunny/i
+score BUNNY 0.3
+body PINKBUNNY /pinkbunny/i
+score PINKBUNNY 3
+body BOOBS_MENTIONED /(b[oO0@][oO0@]b[sz5]|t[1i|]tt[i1|][3e][5s])/i
+score BOOBS_MENTIONED 0.8
+body CRAVINGS /craving/i
+score CRAVINGS 2
+describe CRAVINGS i crave hormel products, cocksmoker
+body COITUS /(fu(ck?|c?k|ck)|s[3e]x)/i
+score COITUS 0.7
+body TEENS /teen/
+score TEENS 0.8
+body BUSTY /busty/i
+score BUSTY 1.5
+body AMATEUR /amateur/i
+score AMATEUR 1.5
+body HALF_BUKAKKE /buk/i
+score HALF_BUKAKKE 1.0
+body LATTER_BUKAKKE /ake/i
+score LATTER_BUKAKKE 0.25
+body FORBIDDEN_POOP /forbidden/i
+score FORBIDDEN_POOP 0.75
+describe FORBIDDEN_POOP if its forbidden, i probably dont want it.
+header ORGY_SUBJECT Subject =~ /orgy/i
+score ORGY_SUBJECT 3
+
+# general stuff
+body AD_IMAGE /ad[-_]\d+x\d+.(jpg|gif)/i
+score AD_IMAGE 1.5
+body OPTIN_CONTAINED /optin/i
+score OPTIN_CONTAINED 0.75
+header OPTAMAIL_HEAD ALL =~ /opta?mail/i
+score OPTAMAIL_HEAD 4.0
+body OPTAMAIL_BOD /opta?mail/i
+score OPTAMAIL_BOD 4.0
+body MARQUEE /marquee/i
+score MARQUEE 1.0
+body WHITE_HTML_TEXT /ffffff/i
+score WHITE_HTML_TEXT 0.5
+body CHAT_MENTIONED /[Cc]hat/
+score CHAT_MENTIONED 0.3
+body RIGHT_NOW_AWAY /right\s+(now|urgent)/i
+score RIGHT_NOW_AWAY 1.0
+body CASINO_MENTIONED /[Cc]asino/
+score CASINO_MENTIONED 1.2
+body PRIZES_MENTIONED /[Pp]rizes?/
+score PRIZES_MENTIONED 1.2
+body STOP_REMOVE_ADDRESS /(st[0o]p|r[3e]m[0o]v[3e])@?/i
+score STOP_REMOVE_ADDRESS 1.55
+body UNSUB /unsubscribe/i
+score UNSUB .75
+body SPECIAL_OFFER /special[ _]*offer/i
+score SPECIAL_OFFER 2.25
+body SUCK_MINOR /suck/
+score SUCK_MINOR 0.2
+body EMAIL_SNEAKY /[3e]m[a4][1li][1li]/i
+score EMAIL_SNEAKY 0.5
+header BOUNCE_ID ALL =~ /bounce/i
+score BOUNCE_ID 0.7
+body TUTTI_FRUITY /tutti/i
+score TUTTI_FRUITY 1.0
+body TUTTI_IT_FRUITY /tutti,/i
+score TUTTI_IT_FRUITY 2.2
+body PENNIES_MENTIONED /pennies/i
+score PENNIES_MENTIONED 1.0
+body PENNIES_OTD /pennies\s*on\s*the\s*dollar/i
+score PENNIES_OTD 3.0
+header PENNIES_MENTIONED_SUBJ Subject =~ /pennies/i
+score PENNIES_MENTIONED_SUBJ 1.0
+header PENNIES_OTD_SUBJ Subject =~ /pennies\s*on\s*the\s*dollar/i
+score PENNIES_OTD_SUBJ 3.0
+body FONTSIZE_ZERO /[10]px/i
+score FONTSIZE_ZERO 3.0
+describe FONTSIZE_ZERO If you don't have anything to say...
+body MSHTML_CONTENT /mshtml/i
+score MSHTML_CONTENT .5
+body NO_THANKS /no\s*thanks/i
+score NO_THANKS 0.2
+body DOT_BIZ /biz/
+score DOT_BIZ 1.5
+body DOT_INFO /\.info/i
+score DOT_INFO 0.4
+body SPAMHAUS_MULTISPAMMER_URL /(youwantthegoods|ultrabean|screamingsquirter|realmilfs|teqwe1|housewifemilfs|unwaveringwax|jerclock|metalink32|1callerid|instrhh|jackmachine|bangparty|farmsluts|pussywecrking|bangmatch|searchperfect|bluebarz|tekmailer|thasti|blanketfun|fugaska|gb764|dailydiscountstore|metareward|more-salz|we4w2s|fd343s|xcvxc3w|adminoffice3|induction3|giveahand1|prefer46f|hostthisman|jenniferyoungtart|adultshorror|medz4cheap|ddsdsas|domainyou|cdsforyou|jaxamat|selcydc|domainyou|healthypolicy|pordea|DigXDigX|metareward|tala72|chokopoppa|oscarfence|homebobbybo|jakescarage|dullboy|dicksmack|hintbusinesslinks|fehthr|gethelpfast|hi-bye|mega-health|perfectrxmd|digitalon|importantcreaked|safecreekhouse|cow8|panasun|thebestplan)/i
+score SPAMHAUS_MULTISPAMMER_URL 12
+body VERDANA_FONT /verdana/i
+score VERDANA_FONT 0.4
+body ARIAL_FONT /arial/i
+score ARIAL_FONT 0.4
+describe VERDANA_FONT monaco 9pt will do fine, thank you.
+body MASSIVE_B /massive/i
+score MASSIVE_B 0.4
+body FREE_STUFF /free/
+score FREE_STUFF 0.4
+header AVONLADY_SPAMEE ALL =~ /(aviroth|avipruz|avonlady|ayerkes|avi26)/i
+score AVONLADY_SPAMEE 12 # instant death
+describe AVONLADY_SPAMEE this poor woman gets a lot of spam. thankfully she's before me in the alphabet.
+header CRUMMY_ISP ALL =~ /(bigfoot|hotmail|telstra|aol|bigpond|bbtec|yahoo|outblaze|fastmail|mailcity|tiscali|adslplus|netscape.net)/i
+score CRUMMY_ISP 1.1
+describe CRUMMY_ISP your isp sends me enough spam that i give it a 25% rejection based upon that alone.
+body BAYES_POISON /^\d{4} [A-Z]/
+score BAYES_POISON 3
+describe BAYES_POISON using timelines to poison bayes filter eg 1776 Blah blah blah
+body MORE_BAYES_POISON /^\|[^|]+\|$/i
+score MORE_BAYES_POISON 3
+describe MORE_BAYES_POISON started seeing shit like: |CgURDCUeBBodDAsPG0caERE=|
+body BROKEN_BAYES_POISON /[a-z] \. [a-z]/
+score BROKEN_BAYES_POISON 1.1
+describe BROKEN_BAYES_POISON jlrjm criwsi, mik, nlnhuz . jbct cjpnc bkctu, leq, mcub . jijjmv
+body ENTITY_WANTS /we\s+want(ed)?\s+to/i
+score ENTITY_WANTS 0.2
+header DISCOUNT_HEADER ALL =~ /discount/i
+score DISCOUNT_HEADER 1.0
+body PRICE_MENTIONED /pr[1i]+c[3e]/i
+score PRICE_MENTIONED 0.4
+body CHEAP_STUFF /cheap/i
+score CHEAP_STUFF 0.3
+body MSHTML_GENERATED /MSHTML/
+score MSHTML_GENERATED 2.0
+header FOAD_FOAD_FOAD ALL =~ /Avriettea/
+score FOAD_FOAD_FOAD 10
+body STRIKETHROUGH /strike/i
+score STRIKETHROUGH 0.7
+header ANTIVIRUS_LIES X-Antivirus =~ /./
+score ANTIVIRUS_LIES 1.0
+describe ANTIVIRUS_LIES the only people using these headers are fucking spammers.
+body BAZE_WTF /baze/i
+score BAZE_WTF 3.0
+describe BAZE_WTF not sure what this is, but many of these jackoffs say 'unsubscribe from baze'
+header SPAMCLIENT X-Mailer =~ /(pipex|netmail)/i
+
+# lottery stuff
+body LOTT_B /lott/i
+score LOTT_B 0.3
+body LOTTERY_B /lottery/i
+score LOTTERY_B 1.5
+body AWARD_B /award/i
+score AWARD_B 0.75
+body WINNINGS_B /winn/i
+score WINNINGS_B 0.75
+body MANY_ZEROS /00,000/
+score MANY_ZEROS 1.5
+body DRAW /draw/i
+score DRAW 0.2
+body AWARD_LIES /award/i
+score AWARD_LIES 0.2
+body TICKET_NUMBER /ticket\s*number/i
+score TICKET_NUMBER 2.8
+
+# software
+body NORTON_SW /n[0o]rt[0o]n/i
+score NORTON_SW 0.3
+body WINDOWS_SW /W[1i]nd[0o]w[z5s]/i
+score WINDOWS_SW 0.3
+body OFFICE_SW /[0o]ff[1li]c[3e]/i
+score OFFICE_SW 0.3
+body SOFTWARE /software/i
+score SOFTWARE 0.2
+
+# pharmacy stuff
+body ANY_PHARMACY /pharmacy/i
+score ANY_PHARMACY .8
+body MEDICATION_SNEAKY /m[e3]+d[1il]+c[a@]t[il1]+[o0]+n/
+score MEDICATION_SNEAKY 1.0
+
+# nigeria stuff
+body NIGERIA_URGENT /URGENT/
+score NIGERIA_URGENT 0.5
+body NIGERIA_CONFID /CONFIDENTIAL/
+score NIGERIA_CONFID 0.5
+body NIGERIA_MENTIONED /nigeria/i
+score NIGERIA_MENTIONED 0.5
+body NIGERIA_MILS /million/i
+score NIGERIA_MILS 0.3
+body NIGERIA_THOUS /thousand/i
+score NIGERIA_THOUS 0.3
+body NIGERIA_RESP /(urgent|prompt|quick)\s+response/i
+score NIGERIA_RESP 0.25
+body NIGERIA_USDOLLARS /\$USD?/i
+score NIGERIA_USDOLLARS 0.5
+# http://www.sas.upenn.edu/African_Studies/Home_Page/Country.html
+body AFRICAN_COUNTRIES /(Algeria|Niger|Angola|Gabon|Nigeria|Benin|Gambia|Reunion|Botswana|Ghana|Rwanda|Burkina|Faso|Guinea|Sao|Tome|Principe|Burundi|Guinea-Bissaau|Senegal|Cameroon|Kenya|Seychelles|Cape|Verde|Lesotho|Sierra|Leone|Liberia|Somalia|Libya|Africa|Comoros|Madagascar|Sudan|Congo|Brazzaville|Malawi|Swaziland|Congo|Mali|Tanzania|Cote|Ivoire|Mauritania|Togo|Djibouti|Mauritius|Tunisia|Egypt|Morocco|Uganda|Equatorial|Guinea|Mozambique|Western|Sahara|Eritrea|Namibia|Zambia|Ethiopia|Zimbabwe)/i
+score AFRICAN_COUNTRIES 1.75
+body AWAITING_ME /await\s*your/i
+score AWAITING_ME 0.8
+
+# drop ms crap where possible 
+body MS_SEC_URL_INSTANT_DEATH /http:\/\/www.microsoft.com\/security\//
+score MS_SEC_URL_INSTANT_DEATH 12
+
+# tuning SA's extant rules
+score REMOVE_PAGE 2
+score MIME_HTML_ONLY 2
+score USER_AGENT_APPLEMAIL -1.5
+score UPPERCASE_75_100 2.5
+score UPPERCASE_25_50 1.5
+score SUBJECT_APPROVED 2.5
+score RCVD_IN_OSIRUSOFT_COM 0
+score NO_FEE 1.8
+score UNSUB 1.8
+score QUOTED_EMAIL_TEXT -1.6
+score MICROSOFT_EXECUTABLE 3
+score FORGED_HOTMAIL_RCVD 1.9
+score MAILTO_TO_SPAM_ADDR 1.0
+score RAZOR2_CF_RANGE_91_100 3
+score HTML_JAVASCRIPT 2
+score TO_ADDRESS_EQ_REAL 0.8
+score HTML_FONT_COLOR_RED 1.5
+score HTML_IMAGE_ONLY_02 3.0
+score PRIORITY_NO_NAME 2.8
+score HTML_LINK_CLICK_HERE 0.75
+score RCVD_IN_SBL 1.75
+score FORGED_MUA_EUDORA 3.5
+score SUBJ_ALL_CAPS 2
+score MIME_HTML_ONLY 1.5
+score USER_AGENT_MOZILLA_UA 0 # also includes windows, so fuck em
+score SPAMHAUS 6
+score USER_AGENT_IMP 0 # could be anyone, most likely forged or useless

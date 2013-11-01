@@ -1,0 +1,25 @@
+"
+BEGIN:VCARD
+VERSION:3.0
+N:avriette;alex;;;
+FN:alex avriette
+ORG:BAE Systems;
+TITLE:Contractor
+EMAIL;type=HOME;type=pref:alex\@posixnap.net
+TEL;type=HOME;type=pref:202 250 3732
+ADR;type=HOME;type=pref:;;320 23rd Street South\n#1416;arlington;VA;22202;United States
+X-AIM;type=HOME;type=pref:avriettea
+END:VCARD
+=============
+"
+"
+BEGIN:VCARD
+VERSION:3.0
+N:$lastname;$firstname;;;
+FN:$fullname
+ORG:BAE Systems;
+EMAIL;type=WORK;type=pref:$email
+TEL;type=WORK;type=pref:$phone
+X-AIM;type=WORK;type=pref:$aim
+END:VCARD
+"

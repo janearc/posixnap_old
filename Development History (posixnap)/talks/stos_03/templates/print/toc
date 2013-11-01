@@ -1,0 +1,5 @@
+<ul>
+  [% FOREACH slide = slides %]
+    <li><a class="link" href="[% slide.0 %].html">[% slide.1 %]</a></li>
+  [% END %]
+</ul>

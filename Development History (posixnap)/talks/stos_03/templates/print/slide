@@ -1,0 +1,40 @@
+[% MACRO present_slide BLOCK %]
+  [% FOREACH node = start.content %]
+	[% IF node.type == 'text' %]
+	  <p>[% node %]</p>
+
+
+	[% ELSIF node.type == 'head2' %]
+	  <h3>[% node.title %]</h3>
+	  [% present_slide( start = node ) %]
+
+
+	[% ELSIF node.type == 'verbatim' %]
+          <p class="verbatim">
+	    [% node | html | replace( ' ', '&nbsp;' ) | replace( "\t", '&nbsp;&nbsp;&nbsp;&nbsp;' ) | replace( "\n", "<br />" ) %]
+          </p>
+
+    [% ELSIF node.type == 'over' %]
+      <dl>
+        [% present_slide( start = node ) %]
+      </dl>
+ 
+
+    [% ELSIF node.type == 'item' %]
+      <dt>[% node.title %]</dt>
+      <dd>
+        [% present_slide( start = node ) %]
+      </dd>
+ 
+    [% ELSIF node.type == 'for' AND node.format == 'html' %]
+      [% node.text %]
+
+
+    [% ELSE %]
+      <p class="error">Unhandled type ``[% node.type %]''!</p>
+	[% END %]
+  [% END %]
+
+[% END %]
+
+[% present_slide( start = slide ) %]

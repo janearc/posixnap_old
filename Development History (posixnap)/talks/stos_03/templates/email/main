@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <title>[% conf.title %] | [% title %]</title>
+    <link href="[% conf.css %]" rel="STYLESHEET" type="text/css" />
+    <link href="perltidy.css" rel="STYLESHEET" type="text/css" />
+  </head>
+  <body>
+    <table class="header-table">
+      <tr>
+        <td class="prev-link">
+        	[% IF prev.defined %]
+        	  <a href="[% prev %].html" class="link">Previous Message</a>
+        	[% ELSE %]
+        	[% END %]
+        </td>
+        <td class="next-link">
+        	[% IF next.defined %]
+        	  <a href="[% next %].html" class="link">Next Message</a>
+        	[% ELSE %]
+        	[% END %]
+        </td>
+      </tr>
+    </table>
+    <table class="content-table">
+      <tr>
+        <td class="content">
+          [% PROCESS $template %]
+        </td>
+      </tr>
+    </table>
+    <table class="footer-table">
+      <tr>
+        <td class="prev-link">
+        	[% IF prev.defined %]
+        	  <a href="[% prev %].html" class="link">Previous Message</a>
+        	[% ELSE %]
+        	[% END %]
+        </td>
+        <td class="next-link">
+        	[% IF next.defined %]
+        	  <a href="[% next %].html" class="link">Next Message</a>
+        	[% ELSE %]
+        	[% END %]
+        </td>
+      </tr>
+      <tr>
+        <td class="ownership" colspan="3">
+          [% conf.copyright %]
+          &lt;<a class="link" href="mailto:[% conf.email %]">[% conf.email %]</a>&gt;
+          <br />
+          [% conf.company %]
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

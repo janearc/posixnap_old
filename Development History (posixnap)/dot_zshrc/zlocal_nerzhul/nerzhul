@@ -1,0 +1,4 @@
+# $Id: nerzhul,v 1.2 2004-03-03 02:54:46 alex Exp $
+addpath /usr/local/pgsql74/bin
+addpath /opt/bin
+# aja // vim:tw=80:ts=2:noet:syntax=zsh

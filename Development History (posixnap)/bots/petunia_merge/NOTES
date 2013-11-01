@@ -1,0 +1,95 @@
+Overview:
+
+	Yay, we have a working bot now. Some history:
+
+	perlSlut: < 400 lines
+	utilibot: 1150 lines
+	petunia: 250 lines, plus 1100 in the database
+	pelvis: 60 lines, and almost 7000 in the codebase
+
+	Right now, because the bot is so drastically different 
+	from previous incarnations, we're still working out the 
+	API. We're also working out how to do the backend. Luckily,
+	the "backend" consists of about 5% of the codebase, and most
+	of it can be dynamically loaded.
+
+	The API is very simple, check out sample_child.pm if you want
+	to write some code.
+
+Vision:
+
+	I want a living, talking, chatting bot. I want hal-9000. I want
+	Eliza. I want Cyc. I want people to talk to petunia for a while 
+	before realizing that she's maybe a bot. I want them to think twice
+	about her being a bot. I want people to be able to discern her functions
+	without having to enter :help. I want people to be able to talk to
+	petunia like she was just another member of the chatroom. It really
+	isnt hard. After millions of lines of IRC chat logs, nothing important
+	has been said, nothing unique to IRC has been said, and every demographic
+	has been expressed. All it takes is a little imagination.
+
+The Authors' Feature Requests (aka: you didn't read the TODO):
+
+		o I want to have "skins" for petunia. This means she needs to 
+		understand who her users are, and respond in kind. This probably
+		entails some very sophisticated input and output parsing. Since we
+		are using a database, the data is not the hard part; the parsing is.
+		As programmers, this scares us, because it puts the burden squarely
+		on our shoulders. It is on longer a case of "wouldn't it be nice if
+		we had a data structure that could handle that." We do. And we have
+		a bad ass database server.
+
+		o We have EvilDBH now. I want it to be a little smarter. It doesn't
+		quite work. Since we've got it, it can't be too much to hack it to
+		*make* it work.
+
+		XXX: we can either have async or we can have evildbh. but not both.
+		we need to decide whether 'uptime' and 'dynamicness' are more important
+		to us or whether the bot is.
+
+		o I like having code in CVS, but we have strayed from the original
+		code-lives-in-the-database vision I had for petunia initially. I want
+		to move back to this. What this would require is a wrapper around the
+		code while youre editing. I see it like this:
+
+		% ./push updated_module.pm
+		Have you run this code through test_pelvis.pl? [Y/n]: 
+		... checking updated_module.pm for perl -c
+		... issuing `cvs commit updated_module.pm`
+		... feeding goro the new code
+		... signalling petunia
+
+		I know that petunia can listen on a socket, since POE allows for it. 
+
+		XXX: this is STILL not done yet. let's fix this. this is an easy code
+		fix.
+
+		o I'm not sure yet what I think of andreas' piping idea. I think it is
+		at least worth a shot. As usual, the validity of a new feature is
+		evaluated, and tested, by our users. Let us see what they think.
+
+		o I want more community features. We already have a thriving community
+		for petunia, aside from her botness. I mean, people can download petunia
+		and run her there, but each petunia (or Hybris) is their own bot. That's
+		what we've focused on from day 1. That's why we use the database. So, I 
+		think that some more "community centric" functions could come out of this.
+		One such idea is the "community music modulator." If we gave petunia some
+		ability to feed each user their own stream of music, we could have a 
+		"channel mood." How cool would that be? Nevermind, that was rhetorical.
+	
+Notes on Modules:
+
+		Some of these modules might be better made a "utility/*pm" module, so
+		that other modules could use them. Translation is one of them. Maybe
+		somebody will throw themselves on this grenade.
+
+		Andreas suggested a possibility of "streaming" modules. This seems 
+		pretty cool to yours truly:
+
+		:xlate en ge my butt is on fire | :kb  ...
+
+		I mean, there really are endless possibilities. I've worked on this some.
+
+		XXX: i think the API is there. i don't think we're missing much. we could
+		really do this if we wanted to. it might be available if somebody wanted
+		to do it badly enough.

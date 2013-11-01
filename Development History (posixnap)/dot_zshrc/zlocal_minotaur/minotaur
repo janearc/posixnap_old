@@ -1,0 +1,9 @@
+# $Id: minotaur,v 1.6 2004-03-03 02:54:43 alex Exp $
+prepath /usr/local/apache2/bin
+prepath ~/bin
+addpath /var/qmail/bin
+
+alias myperl="export PATH=~/perl/bin:${PATH}"
+
+export TERM=xtermc
+# aja // vim:tw=80:ts=2:noet:syntax=zsh

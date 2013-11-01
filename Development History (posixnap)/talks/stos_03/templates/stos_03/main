@@ -1,0 +1,74 @@
+<html>
+  <head>
+    <title>[% conf.title %] | [% title %]</title>
+    <link href="[% conf.css %]" rel="STYLESHEET" type="text/css" />
+    <script>
+      document.captureEvents( Event.MOUSEDOWN );
+      document.onmousedown =
+        function (event) {
+          if ( event.which == 3 ) {
+            location.href = '[% prev %].html#continued';
+            event.preventDefault();
+          } else {
+            location.href = '[% next %].html#continued';
+          }
+        }
+    </script>
+  </head>
+  <body>
+    <table class="header-table">
+      <tr>
+        <td class="talk-title">[% conf.title %]</td>
+        <td class="prev-link">
+        	[% IF prev.defined %]
+        	  <a href="[% prev %].html" class="link">&lt;&lt;</a>
+        	[% ELSE %]
+        	  &lt;&lt;
+        	[% END %]
+        </td>
+        <td class="next-link">
+        	[% IF next.defined %]
+        	  <a href="[% next %].html" class="link">&gt;&gt;</a>
+        	[% ELSE %]
+        	  &gt;&gt;
+        	[% END %]
+        </td>
+      </tr>
+      <tr>
+        <td class="slide-title" colspan="3">[% title %]</td>
+      </tr>
+    </table>
+    <table class="content-table">
+      <tr>
+        <td class="content">
+          [% PROCESS $template %]
+        </td>
+      </tr>
+    </table>
+    <table class="header-table">
+      <tr>
+        <td class="talk-title">[% conf.title %]</td>
+        <td class="prev-link">
+        	[% IF prev.defined %]
+        	  <a href="[% prev %].html#continued" class="link">&lt;&lt;</a>
+        	[% ELSE %]
+        	  &lt;&lt;
+        	[% END %]
+        </td>
+        <td class="next-link">
+        	[% IF next.defined %]
+        	  <a href="[% next %].html#continued" class="link">&gt;&gt;</a>
+        	[% ELSE %]
+        	  &gt;&gt;
+        	[% END %]
+        </td>
+      </tr>
+      <tr>
+        <td class="ownership" colspan="3">
+          [% conf.copyright %]
+          &lt;<a class="link" href="mailto:[% conf.email %]">[% conf.email %]</a>&gt;
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

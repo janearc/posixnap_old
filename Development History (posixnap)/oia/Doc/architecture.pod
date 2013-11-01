@@ -1,0 +1,146 @@
+=head1 Object Independant Architecture Architectural Overview
+
+An introduction to OIA thinking.
+
+=head1 Reasoning Behind OIA
+
+One day, a group of developers sat in a room and discussed their favorite
+programming languages. As the discussion progressed, they realized that the
+things they liked about each language were not necessarily the language 
+itself, but rather parts of that language. An example was one developer who
+liked Java for web front-ends, but preferred to work in Haskell on multi-cpu
+machines because it does threading better.
+
+These same developers were intent on writing a large application from the 
+ground up, and the question had always been "what language are we going to 
+write it in." Well, the solution turned out to be, "use the right language
+for the job."
+
+=head1 Extreme Decoupling
+
+The Object Independant Architecture was developed to achieve ultimate 
+decoupling of code and data. Data has no idea what is processing it,
+because it is encapsulated in an object wrapper. Furthermore, code has
+no idea what is talking to it, only that it is receiving data, and it
+knows what its purpose in life is.
+
+In theory, this should be accomplished through tcp sockets or unix sockets,
+or through the database. However, the idea behind OIA is that you simply 
+don't know where data is coming from. Data could be coming from "tail |",
+but since all you're doing is processing the objects that were fed to you,
+it simply doesn't matter.
+
+This extreme decoupling is intended to assure that code is portable between
+applications and platforms.
+
+=head1 Mother
+
+The one thing that each installation of OIA requires is "Mother." Mother is
+responsible for launching all the children she finds. Where she finds them
+and what she does with them is up to the developer. However, Mother must
+remember where her children are, and ensure that the parsers are there to do
+... whatever it is they do. You're getting the hang of this. See, it could
+be processing web logs in a taskmonitor fashion (e.g., a cluster), or it
+could be responding to web requests, or responding to emails at a helpdesk,
+or any number of other things.
+
+Get the code running, and the data will flow.
+
+=head1 The Back-End (What you don't know can't hurt you)
+
+For the purposes of this section, let us consider items in curly
+braces to be data, and items in square brackets to be functions.
+
+It begins with data. Data is fed to the application, which is picked up by
+one of the data abstraction layers. So we have:
+
+=over 2
+
+  { data } --> [ parser ]
+
+=back
+
+the parser then determines what this data needs to look like. What it really
+does is construct an object. So we can consider our "parser" to be an 
+"object factory."
+
+=over 2
+
+  { data } --> [ parser ] --> { objects } --> [ dispatcher ]
+
+=back
+
+Mother, as one of her duties, launches the dispatcher. Mother also knows 
+who and where her children are. When Mother launches, the dispatcher is
+informed of the serials (if we implement this) of her children, and how
+to reach them. This, again is in XML. Like so:
+
+=over 2
+
+  [ Mother ] --> { objects containing children } --> [ dispatcher ]
+
+=back
+
+So the dispatcher looks something like this:
+
+=over 2
+
+  [ # dispatcher #       ]
+  [ { children serials } ]
+  [ { datas }            ]
+
+=back
+
+it simply does one thing. It feeds Mother's children data. A child object
+might look like this:
+
+=over 2
+
+  <child>
+    <socket path="/tmp/sockname" />
+  	<pid>16733</pid>
+  	<mother serial=57b2ba5ff715f68a65ea8b3bf07026ab />
+  </child>
+
+=back
+
+Our dispatcher knows what it needs to do with a socket, and since it has
+a socket, it knows where to spit data. Let's pretend we know what data
+we're sending to the child, and say that it might look like this:
+
+=over 2
+
+	<query>
+		<referer>http://www.google.com/search?q=OIA</referer>
+		<request>/index.html</request>
+		<remote_addr>66.92.171.173</remote_addr>
+		<cookie key="Password" value="PaPjMWpxq9MUk" />
+	</query>
+
+=back
+
+=head1 Children
+
+So, children are the "components" that make the OIA actually independant.
+Let us say the Mother is aware of three children. Mother has to be aware of
+what do do with these children. We can compile them, interpret them, execute
+them, et cetera. But we have to know how to handle them.
+
+How do we do that? Well, children will have a unique identifier. 
+Additionally, children will be identified by an identifier that corresponds 
+to a template Mother is privy to and will allow her to "run" them (we could 
+be cute and say "bring them in to the world", but let's not for now).
+
+So, for example:
+
+  drwxr-xr-x   3 alex     dev          512 Jul  3 15:11 Components
+  drwxr-xr-x   3 alex     dev          512 Jul  3 10:53 Data
+  drwxr-xr-x   3 alex     dev          512 Jul  3 15:10 Doc
+  drwxr-xr-x   5 alex     dev          512 Jul  3 10:53 Object
+  drwxr-xr-x   3 alex     dev          512 Jul  3 15:11 Templates
+
+In Components, we have children. Our child may be identified as C<fred.pl>.
+Mother is then going to look in C<Templates/> for a file named C<pl-tpl.xml>. 
+This smacks of a hack, so I'm open to suggestions. 
+
+=head1 LICENSE

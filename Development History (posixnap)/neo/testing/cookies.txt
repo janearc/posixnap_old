@@ -1,0 +1,8 @@
+########
+## The cookies keep changing so there are no
+## longer valid cookies stored on cvs...
+##
+## instead, use the login.pl script
+## name : querry43
+## pass : 12345678
+########
